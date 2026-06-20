@@ -14,40 +14,66 @@
 </head>
 <body>
   <div class="container">
-    <div class="header">
+    <header class="header">
       <h1>Latsol Gamify</h1>
-      <div class="header-actions">
+      <nav class="header-actions">
         <button class="btn-ghost" data-nav="/stats">Statistik</button>
         <button class="btn-icon" id="darkToggle" aria-label="Alihkan mode gelap">🌙</button>
-      </div>
-    </div>
+      </nav>
+    </header>
 
-    <div class="hero">
-      <h1>Latihan Soal Kalkulus</h1>
-      <p>34 soal dari Tugas Besar 2 Calculus — kerjakan, evaluasi, lacak progresmu.</p>
-      <div class="hero-actions">
-        <button class="btn btn-prime" id="btnMulai">Mulai Kuis Baru</button>
-        <button class="btn btn-outline" id="btnReviewFlag">Tinjau yang Di-flag</button>
-        <button class="btn btn-outline-danger" id="btnReset">Reset Data</button>
+    <section class="hero">
+      <div class="hero-body">
+        <div class="hero-text">
+          <p class="hero-eyebrow">Tugas Besar 2 — Calculus 2025/2026</p>
+          <h2 class="hero-title">34 Soal<br>Kalkulus</h2>
+          <p class="hero-desc">Kerjakan soal satu per satu, nilai sendiri, dan lihat perkembanganmu.</p>
+          <div class="hero-actions">
+            <button class="btn btn-prime btn-lg" id="btnMulai">Mulai Kuis Baru</button>
+            <button class="btn btn-outline" id="btnReviewFlag">Tinjau yang Di-flag</button>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-ring">
+            <canvas id="heroDonut" width="200" height="200"></canvas>
+            <div class="hero-ring-label">
+              <span class="hero-ring-angka" id="heroSelesai">0</span>
+              <span class="hero-ring-penyebut">/34</span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
 
     <div class="stat-grid" id="statGrid">
-      <div class="stat-card"><div class="nilai" id="sSoal">0</div><div class="label">Selesai</div></div>
-      <div class="stat-card"><div class="nilai" id="sAkurasi">0%</div><div class="label">Akurasi</div></div>
-      <div class="stat-card"><div class="nilai" id="sStreak">0</div><div class="label">Streak</div></div>
-      <div class="stat-card"><div class="nilai" id="sFlag">0</div><div class="label">Di-flag</div></div>
-      <div class="stat-card"><div class="nilai" id="sWaktu">00:00:00</div><div class="label">Total Waktu</div></div>
+      <div class="stat-card" style="animation-delay:0s">
+        <div class="nilai" id="sAkurasi">0%</div>
+        <div class="label">Akurasi</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.06s">
+        <div class="nilai" id="sStreak">0</div>
+        <div class="label">Streak</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.12s">
+        <div class="nilai" id="sFlag">0</div>
+        <div class="label">Di-flag</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.18s">
+        <div class="nilai" id="sWaktu">00:00:00</div>
+        <div class="label">Total Waktu</div>
+      </div>
     </div>
 
-    <div class="chart-box">
-      <h3>Progress Keseluruhan</h3>
-      <canvas id="donutChart" height="200"></canvas>
+    <div class="actions-bar">
+      <button class="btn btn-outline-danger" id="btnReset">Reset Data</button>
     </div>
-    <div class="chart-box">
-      <h3>Akurasi per Bagian</h3>
-      <canvas id="barChart" height="200"></canvas>
-    </div>
+
+    <section class="section">
+      <h2 class="section-title">Akurasi per Bagian</h2>
+      <div class="chart-box">
+        <canvas id="barChart" height="220"></canvas>
+      </div>
+    </section>
   </div>
 
   <!-- Modal Pengaturan -->
@@ -75,7 +101,7 @@
         <input type="checkbox" id="otomatisLanjut">
         <label for="otomatisLanjut">Lanjut otomatis setelah aksi</label>
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <div class="modal-actions">
         <button class="btn btn-outline" id="batalPengaturan">Batal</button>
         <button class="btn btn-prime" id="mulaiKuis">Mulai</button>
       </div>
@@ -86,8 +112,8 @@
   <div class="modal-overlay" id="modalReset">
     <div class="modal">
       <h2>Reset Semua Data?</h2>
-      <p style="color:var(--text-dim);margin-bottom:16px">Semua progres, pengaturan, dan riwayat sesi akan dihapus.</p>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
+      <p class="text-dim">Semua progres, pengaturan, dan riwayat sesi akan dihapus.</p>
+      <div class="modal-actions">
         <button class="btn btn-outline" id="batalReset">Batal</button>
         <button class="btn btn-merah" id="konfirmasiReset">Reset</button>
       </div>
@@ -95,21 +121,39 @@
   </div>
 
   <script>
-    let donutChart, barChart;
+    let donutChart, barChart, heroChart;
 
     function renderDashboard() {
       const stats = getStatistik();
-      document.getElementById("sSoal").textContent = stats.dikerjakan + "/" + stats.total;
       document.getElementById("sAkurasi").textContent = stats.akurasi + "%";
       document.getElementById("sStreak").textContent = stats.streakSaatIni;
       document.getElementById("sFlag").textContent = stats.flag;
       document.getElementById("sWaktu").textContent = formatWaktu(stats.totalWaktu);
-
-      if (donutChart) donutChart.destroy();
-      donutChart = buatDonut(document.getElementById("donutChart").getContext("2d"), stats);
+      document.getElementById("heroSelesai").textContent = stats.dikerjakan;
 
       if (barChart) barChart.destroy();
       barChart = buatBarBagian(document.getElementById("barChart").getContext("2d"), stats);
+
+      if (heroChart) heroChart.destroy();
+      const heroCtx = document.getElementById("heroDonut").getContext("2d");
+      const sisa = stats.total - stats.dikerjakan;
+      heroChart = new Chart(heroCtx, {
+        type: "doughnut",
+        data: {
+          labels: ["Selesai", "Sisa"],
+          datasets: [{
+            data: [stats.dikerjakan || 1, sisa || 1],
+            backgroundColor: ["#8b7355", "#e0dfda"],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          cutout: "78%",
+          plugins: { legend: { display: false }, tooltip: { enabled: false } }
+        }
+      });
     }
 
     initDarkMode();
@@ -124,6 +168,10 @@
 
     document.getElementById("batalPengaturan").addEventListener("click", () => {
       document.getElementById("modalPengaturan").classList.remove("visible");
+    });
+
+    document.getElementById("batalReset").addEventListener("click", () => {
+      document.getElementById("modalReset").classList.remove("visible");
     });
 
     document.addEventListener("keydown", e => {
@@ -150,9 +198,7 @@
     document.getElementById("btnReset").addEventListener("click", () => {
       document.getElementById("modalReset").classList.add("visible");
     });
-    document.getElementById("batalReset").addEventListener("click", () => {
-      document.getElementById("modalReset").classList.remove("visible");
-    });
+
     document.getElementById("konfirmasiReset").addEventListener("click", () => {
       resetSemuaData();
       document.getElementById("modalReset").classList.remove("visible");
