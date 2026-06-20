@@ -870,10 +870,10 @@
       });
     })();
 
-    // Boot
-    const path = window.location.pathname.replace(/\/+$/, "") || "/";
-    const known = { "/": "initDashboard", "/quiz": "initQuiz", "/stats": "initStats" };
-    if (known[path]) window[known[path]]();
+    // Boot — read hash to determine which page to initialize
+    const hash = location.hash || "#/";
+    const known = { "#/": "initDashboard", "#/quiz": "initQuiz", "#/stats": "initStats" };
+    if (known[hash]) window[known[hash]]();
   </script>
 </body>
 </html>
