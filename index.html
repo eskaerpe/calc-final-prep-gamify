@@ -10,75 +10,221 @@
   <script src="js/questions.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/storage.js"></script>
-  <script src="js/router.js"></script>
 </head>
 <body>
   <div class="container">
-    <header class="header">
-      <h1>Latsol Gamify</h1>
-      <nav class="header-actions">
-        <button class="btn-ghost" data-nav="/stats">Statistik</button>
-        <button class="btn-icon" id="darkToggle" aria-label="Alihkan mode gelap">🌙</button>
-      </nav>
-    </header>
+    <!-- ============ PAGE: DASHBOARD ============ -->
+    <div id="page-dashboard" class="page aktif">
+      <header class="header">
+        <h1>Latsol Gamify</h1>
+        <nav class="header-actions">
+          <button class="btn-ghost" data-nav="/stats">Statistik</button>
+          <button class="btn-icon" id="darkToggle" aria-label="Alihkan mode gelap">&#127769;</button>
+        </nav>
+      </header>
 
-    <section class="hero">
-      <div class="hero-body">
-        <div class="hero-text">
-          <p class="hero-eyebrow">Tugas Besar 2 — Calculus 2025/2026</p>
-          <h2 class="hero-title" id="heroTitle">32 Soal<br>Kalkulus</h2>
-          <p class="hero-desc">Kerjakan soal satu per satu, nilai sendiri, dan lihat perkembanganmu.</p>
-          <div class="hero-actions">
-            <button class="btn btn-prime btn-lg" id="btnMulai">Mulai Kuis Baru</button>
-            <button class="btn btn-outline" id="btnReviewFlag">Tinjau yang Di-flag</button>
+      <section class="hero">
+        <div class="hero-body">
+          <div class="hero-text">
+            <p class="hero-eyebrow">Tugas Besar 2 — Calculus 2025/2026</p>
+            <h2 class="hero-title" id="heroTitle">32 Soal<br>Kalkulus</h2>
+            <p class="hero-desc">Kerjakan soal satu per satu, nilai sendiri, dan lihat perkembanganmu.</p>
+            <div class="hero-actions">
+              <button class="btn btn-prime btn-lg" id="btnMulai">Mulai Kuis Baru</button>
+              <button class="btn btn-outline" id="btnReviewFlag">Tinjau yang Di-flag</button>
+            </div>
           </div>
-        </div>
-        <div class="hero-visual">
-          <div class="hero-ring">
-            <canvas id="heroDonut" width="200" height="200"></canvas>
-            <div class="hero-ring-label">
-              <span class="hero-ring-angka" id="heroSelesai">0</span>
-              <span class="hero-ring-penyebut" id="heroTotal">/32</span>
+          <div class="hero-visual">
+            <div class="hero-ring">
+              <canvas id="heroDonut" width="200" height="200"></canvas>
+              <div class="hero-ring-label">
+                <span class="hero-ring-angka" id="heroSelesai">0</span>
+                <span class="hero-ring-penyebut" id="heroTotal">/32</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <div class="stat-grid" id="statGrid">
-      <div class="stat-card" style="animation-delay:0s">
-        <div class="nilai" id="sAkurasi">0%</div>
-        <div class="label">Akurasi</div>
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card" style="animation-delay:0s">
+          <div class="nilai" id="sAkurasi">0%</div>
+          <div class="label">Akurasi</div>
+        </div>
+        <div class="stat-card" style="animation-delay:0.06s">
+          <div class="nilai" id="sStreak">0</div>
+          <div class="label">Streak</div>
+        </div>
+        <div class="stat-card" style="animation-delay:0.12s">
+          <div class="nilai" id="sFlag">0</div>
+          <div class="label">Di-flag</div>
+        </div>
+        <div class="stat-card" style="animation-delay:0.18s">
+          <div class="nilai" id="sWaktu">00:00:00</div>
+          <div class="label">Total Waktu</div>
+        </div>
       </div>
-      <div class="stat-card" style="animation-delay:0.06s">
-        <div class="nilai" id="sStreak">0</div>
-        <div class="label">Streak</div>
+
+      <div class="actions-bar" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline" id="btnExport">Ekspor Data</button>
+          <button class="btn btn-outline" id="btnImport">Impor Data</button>
+          <input type="file" id="fileImport" accept=".json" style="display:none">
+        </div>
+        <button class="btn btn-outline-danger" id="btnReset">Reset Data</button>
       </div>
-      <div class="stat-card" style="animation-delay:0.12s">
-        <div class="nilai" id="sFlag">0</div>
-        <div class="label">Di-flag</div>
+
+      <section class="section">
+        <h2 class="section-title">Akurasi per Bagian</h2>
+        <div class="chart-box">
+          <canvas id="dashBarChart" height="220"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ PAGE: QUIZ ============ -->
+    <div id="page-quiz" class="page">
+      <div class="top-bar">
+        <div class="top-bar-info">
+          <span id="soalCounter">Soal 1 / 32</span>
+          <span class="badge badge-1" id="badgeBagian">Teknik Integral</span>
+          <span id="timerDisplay">00:00:00</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn-icon" title="Statistik Live" id="panelToggle" aria-label="Statistik live">&#128202;</button>
+          <button class="btn-ghost" data-nav="/">Beranda</button>
+          <button class="btn-icon" id="darkToggle2" aria-label="Alihkan mode gelap">&#127769;</button>
+        </div>
       </div>
-      <div class="stat-card" style="animation-delay:0.18s">
-        <div class="nilai" id="sWaktu">00:00:00</div>
-        <div class="label">Total Waktu</div>
+
+      <div class="question-card" id="questionCard">
+        <div class="question-number" id="questionId">1a</div>
+        <div class="question-math" id="questionMath">$$ \int_0^1 \frac{x+2}{(x^2+4x+1)^2} \, dx $$</div>
+      </div>
+
+      <div class="hint-box" id="hintBox">
+        <div class="hint-label">Petunjuk</div>
+        <div class="hint-text" id="hintText"></div>
+      </div>
+
+      <div class="answer-box" id="answerBox">
+        <textarea id="answerText" placeholder="Tulis jawabanmu di sini (opsional)..." rows="2"></textarea>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-hijau" id="btnBenar">Benar <span class="kbd">B</span></button>
+        <button class="btn btn-merah" id="btnSalah">Salah <span class="kbd">S</span></button>
+        <button class="btn btn-abu" id="btnLewati">Lewati <span class="kbd">L</span></button>
+        <button class="btn btn-kuning" id="btnFlag">Flag <span class="kbd">F</span></button>
+        <button class="btn btn-outline" id="btnPetunjuk">Petunjuk <span class="kbd">P</span></button>
+      </div>
+
+      <div class="nav-bar">
+        <button class="btn btn-outline" id="btnPrev">&#9664; Sebelumnya</button>
+        <div class="progress-dots" id="progressDots"></div>
+        <button class="btn btn-prime" id="btnNext">Berikutnya &#9654;</button>
+      </div>
+
+      <div id="selesaiContainer" style="display:none">
+        <div class="congrats card">
+          <h2>Selamat!</h2>
+          <p>Kamu telah menyelesaikan semua soal dalam sesi ini.</p>
+          <div style="display:flex;gap:8px;justify-content:center">
+            <button class="btn btn-prime" data-nav="/stats">Lihat Statistik</button>
+            <button class="btn btn-outline" data-nav="/">Kembali</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Stats Panel -->
+      <button class="panel-toggle" id="panelToggleBtn" title="Live Statistik">&#9664;</button>
+      <div class="live-panel" id="livePanel">
+        <div class="live-panel-inner">
+          <h3>Sesi Ini</h3>
+          <div class="live-stat"><span class="lbl">Soal Dikerjakan</span><span class="val" id="liveSelesai">0</span></div>
+          <div class="live-stat"><span class="lbl">Benar</span><span class="val" style="color:var(--hijau)" id="liveBenar">0</span></div>
+          <div class="live-stat"><span class="lbl">Salah</span><span class="val" style="color:var(--merah)" id="liveSalah">0</span></div>
+          <div class="live-stat"><span class="lbl">Dilewati</span><span class="val" style="color:var(--abu)" id="liveLewati">0</span></div>
+          <div class="live-stat"><span class="lbl">Di-flag</span><span class="val" style="color:var(--kuning)" id="liveFlag">0</span></div>
+          <div class="live-stat"><span class="lbl">Streak</span><span class="val" id="liveStreak">0</span></div>
+          <div class="live-stat"><span class="lbl">Akurasi</span><span class="val" id="liveAkurasi">0%</span></div>
+          <div class="live-chart-box">
+            <canvas id="liveDonut" height="160"></canvas>
+          </div>
+
+          <h3 style="margin-top:20px">Global</h3>
+          <div class="live-stat"><span class="lbl">Total Dikerjakan</span><span class="val" id="liveGlobalSelesai">0</span></div>
+          <div class="live-stat"><span class="lbl">Akurasi Global</span><span class="val" id="liveGlobalAkurasi">0%</span></div>
+        </div>
       </div>
     </div>
 
-    <div class="actions-bar" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-outline" id="btnExport">Ekspor Data</button>
-        <button class="btn btn-outline" id="btnImport">Impor Data</button>
-        <input type="file" id="fileImport" accept=".json" style="display:none">
+    <!-- ============ PAGE: STATS ============ -->
+    <div id="page-stats" class="page">
+      <div class="header">
+        <h1>Statistik</h1>
+        <div class="header-actions">
+          <button class="btn-ghost" data-nav="/">Beranda</button>
+          <button class="btn btn-prime" id="statsKuisBaru">Kuis Baru</button>
+          <button class="btn-icon" id="darkToggle3" aria-label="Alihkan mode gelap">&#127769;</button>
+        </div>
       </div>
-      <button class="btn btn-outline-danger" id="btnReset">Reset Data</button>
-    </div>
 
-    <section class="section">
-      <h2 class="section-title">Akurasi per Bagian</h2>
-      <div class="chart-box">
-        <canvas id="barChart" height="220"></canvas>
+      <div class="stat-grid" id="statsRingkasan">
+        <div class="stat-card"><div class="nilai" id="sSelesai">0</div><div class="label">Selesai</div></div>
+        <div class="stat-card"><div class="nilai" id="sAkurasi2">0%</div><div class="label">Akurasi</div></div>
+        <div class="stat-card"><div class="nilai" id="sStreak2">0</div><div class="label">Streak Saat Ini</div></div>
+        <div class="stat-card"><div class="nilai" id="sStreakMax">0</div><div class="label">Streak Terpanjang</div></div>
+        <div class="stat-card"><div class="nilai" id="sWaktu2">00:00:00</div><div class="label">Total Waktu</div></div>
       </div>
-    </section>
+
+      <div class="nav-tabs" role="tablist">
+        <button class="nav-tab aktif" data-tab="grafik" role="tab" aria-selected="true">Grafik</button>
+        <button class="nav-tab" data-tab="detail" role="tab" aria-selected="false">Detail Soal</button>
+        <button class="nav-tab" data-tab="sesi" role="tab" aria-selected="false">Riwayat Sesi</button>
+      </div>
+
+      <div class="page-content aktif" id="page-grafik" role="tabpanel">
+        <div class="chart-box">
+          <h3>Status Keseluruhan</h3>
+          <canvas id="donutChart" height="200"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Benar / Salah per Bagian</h3>
+          <canvas id="statsBarChart" height="220"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Soal per Hari</h3>
+          <canvas id="lineChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="page-content" id="page-detail" role="tabpanel" hidden>
+        <div class="card" style="overflow:hidden;padding:0">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Soal</th>
+                  <th>Bagian</th>
+                  <th>Status</th>
+                  <th>Tanggal</th>
+                </tr>
+              </thead>
+              <tbody id="detailTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="page-content" id="page-sesi" role="tabpanel" hidden>
+        <div class="card" style="overflow:hidden;padding:0">
+          <div class="table-wrap" id="sesiContainer">
+            <p style="padding:20px;color:var(--text-dim)">Belum ada riwayat sesi.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Modal Pengaturan -->
@@ -92,7 +238,7 @@
           <option value="1">Teknik Integral</option>
           <option value="2">Aplikasi Integral</option>
           <option value="3">Deret dan Kekonvergenan</option>
-          <option value="4">Deret Taylor & Maclaurin</option>
+          <option value="4">Deret Taylor &amp; Maclaurin</option>
         </select>
       </div>
       <div class="form-group">
@@ -126,104 +272,580 @@
   </div>
 
   <script>
-    let donutChart, barChart, heroChart;
+    function loadMathJax() {
+      if (window.MathJax && window.MathJax.typesetPromise) return;
+      window.MathJax = {
+        tex: { inlineMath: [["$","$"],["\\(","\\)"]] },
+        chtml: { fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2" }
+      };
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js";
+      s.async = true;
+      document.head.appendChild(s);
+    }
+    loadMathJax();
+  </script>
 
-    function renderDashboard() {
-      const stats = getStatistik();
-      document.getElementById("sAkurasi").textContent = stats.akurasi + "%";
-      document.getElementById("sStreak").textContent = stats.streakSaatIni;
-      document.getElementById("sFlag").textContent = stats.flag;
-      document.getElementById("sWaktu").textContent = formatWaktu(stats.totalWaktu);
-      document.getElementById("heroSelesai").textContent = stats.benar;
-      document.getElementById("heroTotal").textContent = "/" + stats.total;
-      document.getElementById("heroTitle").innerHTML = stats.total + " Soal<br>Kalkulus";
+  <!-- ============ DASHBOARD SCRIPT ============ -->
+  <script>
+    function initDashboard() {
+      if (window.__dashInited) { renderDashboard(); return; }
+      window.__dashInited = true;
 
-      if (barChart) barChart.destroy();
-      barChart = buatBarBagian(document.getElementById("barChart").getContext("2d"), stats);
+      let dashBarChart, dashHeroChart;
 
-      if (heroChart) heroChart.destroy();
-      const heroCtx = document.getElementById("heroDonut").getContext("2d");
-      const belum = stats.total - stats.dikerjakan;
-      heroChart = new Chart(heroCtx, {
+      function renderDashboard() {
+        const stats = getStatistik();
+        document.getElementById("sAkurasi").textContent = stats.akurasi + "%";
+        document.getElementById("sStreak").textContent = stats.streakSaatIni;
+        document.getElementById("sFlag").textContent = stats.flag;
+        document.getElementById("sWaktu").textContent = formatWaktu(stats.totalWaktu);
+        document.getElementById("heroSelesai").textContent = stats.benar;
+        document.getElementById("heroTotal").textContent = "/" + stats.total;
+        document.getElementById("heroTitle").innerHTML = stats.total + " Soal<br>Kalkulus";
+
+        if (dashBarChart) dashBarChart.destroy();
+        dashBarChart = buatBarBagian(document.getElementById("dashBarChart").getContext("2d"), stats);
+
+        if (dashHeroChart) dashHeroChart.destroy();
+        const heroCtx = document.getElementById("heroDonut").getContext("2d");
+        const belum = stats.total - stats.dikerjakan;
+        dashHeroChart = new Chart(heroCtx, {
+          type: "doughnut",
+          data: {
+            labels: ["Benar", "Salah", "Belum"],
+            datasets: [{
+              data: [stats.benar || 1, stats.salah || 1, belum || 1],
+              backgroundColor: ["#8b7355", "#c47a7a", "#e0dfda"],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: "78%",
+            plugins: { legend: { display: false }, tooltip: { enabled: false } }
+          }
+        });
+      }
+
+      document.getElementById("btnMulai").addEventListener("click", () => {
+        const p = getPengaturan();
+        document.getElementById("filterBagian").value = p.filter || "semua";
+        document.getElementById("urutanSoal").value = p.urutan || "berurutan";
+        document.getElementById("otomatisLanjut").checked = p.otomatisLanjut || false;
+        document.getElementById("modalPengaturan").classList.add("visible");
+      });
+
+      document.getElementById("batalPengaturan").addEventListener("click", () => {
+        document.getElementById("modalPengaturan").classList.remove("visible");
+      });
+
+      document.getElementById("batalReset").addEventListener("click", () => {
+        document.getElementById("modalReset").classList.remove("visible");
+      });
+
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape") {
+          document.querySelectorAll(".modal-overlay.visible").forEach(m => m.classList.remove("visible"));
+        }
+      });
+
+      document.getElementById("mulaiKuis").addEventListener("click", () => {
+        simpanPengaturan({
+          ...getPengaturan(),
+          filter: document.getElementById("filterBagian").value,
+          urutan: document.getElementById("urutanSoal").value,
+          otomatisLanjut: document.getElementById("otomatisLanjut").checked
+        });
+        navigasi("/quiz", true);
+      });
+
+      document.getElementById("btnReviewFlag").addEventListener("click", () => {
+        simpanPengaturan({ ...getPengaturan(), filter: "flag" });
+        navigasi("/quiz", true);
+      });
+
+      document.getElementById("btnExport").addEventListener("click", exportData);
+
+      document.getElementById("btnImport").addEventListener("click", () => {
+        document.getElementById("fileImport").click();
+      });
+
+      document.getElementById("fileImport").addEventListener("change", (e) => {
+        if (e.target.files[0]) importData(e.target.files[0]);
+        e.target.value = "";
+      });
+
+      document.getElementById("btnReset").addEventListener("click", () => {
+        document.getElementById("modalReset").classList.add("visible");
+      });
+
+      document.getElementById("konfirmasiReset").addEventListener("click", () => {
+        resetSemuaData();
+        document.getElementById("modalReset").classList.remove("visible");
+        renderDashboard();
+      });
+
+      renderDashboard();
+    }
+  </script>
+
+  <!-- ============ QUIZ SCRIPT ============ -->
+  <script>
+    let quizState = null;
+
+    function initQuiz(fresh) {
+      const first = !window.__quizInited;
+
+      if (first) {
+        window.__quizInited = true;
+
+        window.addEventListener("beforeunload", e => {
+          if (quizState && quizState.sesiDimulai && !quizState.isSelesai) {
+            e.preventDefault();
+            e.returnValue = "";
+          }
+        });
+
+        document.getElementById("panelToggle").addEventListener("click", toggleQuizPanel);
+        document.getElementById("panelToggleBtn").addEventListener("click", toggleQuizPanel);
+
+        document.getElementById("btnBenar").addEventListener("click", () => aksi("benar"));
+        document.getElementById("btnSalah").addEventListener("click", () => aksi("salah"));
+        document.getElementById("btnLewati").addEventListener("click", () => aksi("lewat"));
+        document.getElementById("btnFlag").addEventListener("click", () => {
+          const q = quizState.daftarSoal[quizState.index];
+          const p = getProgresSoal(q.id);
+          const newStatus = p.status === "flag" ? "" : "flag";
+          if (newStatus === "flag") quizState.sesiFlag++; else quizState.sesiFlag = Math.max(0, quizState.sesiFlag - 1);
+          updateProgresSoal(q.id, { status: newStatus, jawaban: document.getElementById("answerText").value, waktu: 0 });
+          updateLiveStats();
+          renderSoal();
+        });
+        document.getElementById("btnPetunjuk").addEventListener("click", () => {
+          document.getElementById("hintBox").classList.toggle("visible");
+        });
+
+        document.getElementById("btnPrev").addEventListener("click", () => {
+          simpanJawabanSaatIni();
+          if (quizState.index > 0) { quizState.index--; renderSoal(); }
+        });
+        document.getElementById("btnNext").addEventListener("click", () => {
+          simpanJawabanSaatIni();
+          quizState.index++;
+          renderSoal();
+        });
+
+        document.addEventListener("keydown", e => {
+          if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+          if (e.key === "Escape") { if (quizState && quizState.panelOpen) toggleQuizPanel(); return; }
+          switch (e.key.toLowerCase()) {
+            case "b": document.getElementById("btnBenar").click(); break;
+            case "s": document.getElementById("btnSalah").click(); break;
+            case "l": document.getElementById("btnLewati").click(); break;
+            case "f": document.getElementById("btnFlag").click(); break;
+            case "p": document.getElementById("btnPetunjuk").click(); break;
+            case "arrowright": document.getElementById("btnNext").click(); break;
+            case "arrowleft": document.getElementById("btnPrev").click(); break;
+          }
+        });
+      }
+
+      if (first || fresh) {
+        // Restore DOM to default state in case previous session hid them
+        const qc = document.getElementById("questionCard");
+        qc.style.display = "";
+        qc.style.padding = "";
+        document.getElementById("hintBox").style.display = "";
+        document.getElementById("answerBox").style.display = "";
+        document.getElementById("answerText").value = "";
+        document.querySelector("#page-quiz .action-bar").style.display = "";
+        document.querySelector("#page-quiz .nav-bar").style.display = "";
+        document.getElementById("selesaiContainer").style.display = "none";
+
+        const pengaturan = { ...getPengaturanDefault(), ...getPengaturan() };
+        let daftarSoal = [...questions];
+        let skipping = false;
+        let flagFallback = false;
+
+        if (pengaturan.filter === "flag") {
+          const progres = getProgres();
+          const flagged = questions.filter(q => progres[q.id]?.status === "flag");
+          if (flagged.length > 0) {
+            daftarSoal = flagged;
+          } else {
+            flagFallback = true;
+          }
+        } else if (pengaturan.filter !== "semua") {
+          daftarSoal = questions.filter(q => q.part === parseInt(pengaturan.filter));
+        }
+
+        if (daftarSoal.length === 0) {
+          document.getElementById("questionCard").innerHTML = '<div style="text-align:center;padding:40px"><h2>Tidak ada soal</h2><p style="color:var(--text-dim)">Tidak ada soal yang cocok dengan filter ini.</p><button class="btn btn-outline mt-4" onclick="navigasi(\'/\')">Kembali</button></div>';
+          document.getElementById("selesaiContainer").style.display = "none";
+          document.querySelector("#page-quiz .action-bar").innerHTML = "";
+          document.querySelector("#page-quiz .nav-bar").innerHTML = "";
+          document.getElementById("questionId").textContent = "";
+          document.getElementById("answerBox").style.display = "none";
+          skipping = true;
+        }
+
+        if (pengaturan.urutan === "acak" && pengaturan.filter !== "flag") {
+          daftarSoal = acakArray(daftarSoal);
+        }
+
+        if (flagFallback) {
+          const qc = document.getElementById("questionCard");
+          qc.innerHTML = '<div style="text-align:center;padding:40px"><p style="color:var(--text-dim);margin-bottom:12px">Belum ada soal yang di-flag.</p><button class="btn btn-outline mt-4" onclick="navigasi(\'/\')">Kembali</button></div>';
+          document.querySelector("#page-quiz .action-bar").innerHTML = "";
+          document.querySelector("#page-quiz .nav-bar").innerHTML = "";
+          document.getElementById("answerBox").style.display = "none";
+          skipping = true;
+        }
+
+        quizState = {
+          daftarSoal,
+          pengaturan,
+          index: 0,
+          timerDetik: 0,
+          timerInterval: null,
+          isSelesai: false,
+          sesiDimulai: false,
+          streakSesi: 0,
+          sesiBenar: 0,
+          sesiSalah: 0,
+          sesiLewati: 0,
+          sesiFlag: 0,
+          liveChart: null,
+          panelOpen: false,
+          panelToggleBtn: document.getElementById("panelToggleBtn"),
+          panel: document.getElementById("livePanel"),
+          skipping,
+          statsSebelum: getStatistik()
+        };
+      }
+
+      if (first && quizState && !quizState.skipping) {
+        updateLiveStats();
+      }
+
+      if (quizState && !quizState.skipping) {
+        renderSoal();
+      }
+    }
+
+    function simpanJawabanSaatIni() {
+      if (!quizState) return;
+      const q = quizState.daftarSoal[quizState.index];
+      if (!q) return;
+      updateProgresSoal(q.id, {
+        jawaban: document.getElementById("answerText").value,
+        waktu: 0,
+        status: getProgresSoal(q.id).status || ""
+      });
+    }
+
+    function mulaiTimer() {
+      if (!quizState || quizState.timerInterval) return;
+      quizState.sesiDimulai = true;
+      quizState.timerInterval = setInterval(() => {
+        quizState.timerDetik++;
+        document.getElementById("timerDisplay").textContent = formatWaktu(quizState.timerDetik);
+      }, 1000);
+    }
+
+    function renderSoal() {
+      if (!quizState || quizState.isSelesai) return;
+      if (quizState.skipping) return;
+      if (quizState.index >= quizState.daftarSoal.length) {
+        tampilkanSelesai();
+        return;
+      }
+      if (quizState.index < 0) quizState.index = 0;
+
+      const q = quizState.daftarSoal[quizState.index];
+      const p = getProgresSoal(q.id);
+      const s = quizState.daftarSoal;
+
+      document.getElementById("soalCounter").textContent = `Soal ${quizState.index + 1} / ${s.length}`;
+      document.getElementById("questionId").textContent = q.id + "  " + q.partName + "  " + q.poin + " poin";
+
+      const mathEl = document.getElementById("questionMath");
+      const card = document.getElementById("questionCard");
+      if (q.tipe === "text") {
+        mathEl.className = "question-text";
+        mathEl.innerHTML = q.soal.replace(/\n/g, "<br>");
+        card.classList.add("text-left");
+      } else {
+        mathEl.className = "question-math";
+        mathEl.innerHTML = "$$" + q.soal + "$$";
+        card.classList.remove("text-left");
+      }
+
+      document.getElementById("hintText").textContent = q.petunjuk;
+      document.getElementById("hintBox").classList.remove("visible");
+      document.getElementById("answerText").value = p.jawaban || "";
+
+      const badge = document.getElementById("badgeBagian");
+      badge.className = "badge badge-" + q.part;
+      badge.textContent = q.partName;
+
+      document.getElementById("btnFlag").classList.toggle("aktif", p.status === "flag");
+
+      renderProgressDots();
+      renderMath();
+    }
+
+    function renderProgressDots() {
+      if (!quizState) return;
+      const container = document.getElementById("progressDots");
+      const progres = getProgres();
+      container.innerHTML = quizState.daftarSoal.map((q, i) => {
+        let cls = "progress-dot";
+        if (i === quizState.index) cls += " aktif";
+        const st = progres[q.id]?.status || "";
+        if (st) cls += " " + st;
+        return '<div class="' + cls + '" data-idx="' + i + '"></div>';
+      }).join("");
+
+      container.querySelectorAll(".progress-dot").forEach(dot => {
+        dot.addEventListener("click", () => {
+          simpanJawabanSaatIni();
+          quizState.index = parseInt(dot.dataset.idx);
+          renderSoal();
+        });
+      });
+    }
+
+    function renderMath() {
+      if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise();
+      }
+    }
+
+    function aksi(status) {
+      if (!quizState) return;
+      mulaiTimer();
+      const q = quizState.daftarSoal[quizState.index];
+
+      if (status === "benar") { quizState.streakSesi++; quizState.sesiBenar++; }
+      else if (status === "salah") { quizState.streakSesi = 0; quizState.sesiSalah++; }
+      else if (status === "lewat") { quizState.sesiLewati++; }
+      else if (status === "flag") { quizState.sesiFlag++; }
+
+      updateProgresSoal(q.id, {
+        status,
+        jawaban: document.getElementById("answerText").value,
+        waktu: 0
+      });
+
+      updateLiveStats();
+
+      if (quizState.pengaturan.otomatisLanjut) {
+        quizState.index++;
+        renderSoal();
+      } else {
+        renderProgressDots();
+      }
+    }
+
+    function updateLiveStats() {
+      if (!quizState) return;
+      const selesai = quizState.sesiBenar + quizState.sesiSalah + quizState.sesiLewati;
+      const akurasi = selesai > 0 ? Math.round((quizState.sesiBenar / selesai) * 100) : 0;
+      document.getElementById("liveSelesai").textContent = selesai;
+      document.getElementById("liveBenar").textContent = quizState.sesiBenar;
+      document.getElementById("liveSalah").textContent = quizState.sesiSalah;
+      document.getElementById("liveLewati").textContent = quizState.sesiLewati;
+      document.getElementById("liveFlag").textContent = quizState.sesiFlag;
+      document.getElementById("liveStreak").textContent = quizState.streakSesi;
+      document.getElementById("liveAkurasi").textContent = akurasi + "%";
+
+      const g = getStatistik();
+      document.getElementById("liveGlobalSelesai").textContent = g.dikerjakan;
+      document.getElementById("liveGlobalAkurasi").textContent = g.akurasi + "%";
+
+      if (quizState.liveChart) quizState.liveChart.destroy();
+      const ctx = document.getElementById("liveDonut").getContext("2d");
+      quizState.liveChart = new Chart(ctx, {
         type: "doughnut",
         data: {
-          labels: ["Benar", "Salah", "Belum"],
+          labels: ["Benar", "Salah", "Lewati", "Flag"],
           datasets: [{
-            data: [stats.benar || 1, stats.salah || 1, belum || 1],
-            backgroundColor: ["#8b7355", "#c47a7a", "#e0dfda"],
+            data: [quizState.sesiBenar || 1, quizState.sesiSalah || 1, quizState.sesiLewati || 1, quizState.sesiFlag || 1],
+            backgroundColor: ["#7ca67c", "#c47a7a", "#8a8a8a", "#c4a67a"],
             borderWidth: 0
           }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          cutout: "78%",
-          plugins: { legend: { display: false }, tooltip: { enabled: false } }
+          responsive: true, cutout: "72%",
+          plugins: { legend: { display: false } }
         }
       });
     }
 
-    initDarkMode();
+    function toggleQuizPanel() {
+      if (!quizState) return;
+      quizState.panelOpen = !quizState.panelOpen;
+      quizState.panel.classList.toggle("terbuka", quizState.panelOpen);
+      quizState.panelToggleBtn.classList.toggle("terbuka", quizState.panelOpen);
+      quizState.panelToggleBtn.textContent = quizState.panelOpen ? "\u25B6" : "\u25C0";
+    }
 
-    document.getElementById("btnMulai").addEventListener("click", () => {
-      const p = getPengaturan();
-      document.getElementById("filterBagian").value = p.filter || "semua";
-      document.getElementById("urutanSoal").value = p.urutan || "berurutan";
-      document.getElementById("otomatisLanjut").checked = p.otomatisLanjut || false;
-      document.getElementById("modalPengaturan").classList.add("visible");
-    });
+    function tampilkanSelesai() {
+      if (!quizState) return;
+      quizState.isSelesai = true;
+      if (quizState.timerInterval) clearInterval(quizState.timerInterval);
+      document.getElementById("questionCard").style.display = "none";
+      document.getElementById("hintBox").style.display = "none";
+      document.getElementById("answerBox").style.display = "none";
+      document.querySelector("#page-quiz .action-bar").style.display = "none";
+      document.querySelector("#page-quiz .nav-bar").style.display = "none";
+      document.getElementById("timerDisplay").textContent = formatWaktu(quizState.timerDetik);
 
-    document.getElementById("batalPengaturan").addEventListener("click", () => {
-      document.getElementById("modalPengaturan").classList.remove("visible");
-    });
-
-    document.getElementById("batalReset").addEventListener("click", () => {
-      document.getElementById("modalReset").classList.remove("visible");
-    });
-
-    document.addEventListener("keydown", e => {
-      if (e.key === "Escape") {
-        document.querySelectorAll(".modal-overlay.visible").forEach(m => m.classList.remove("visible"));
-      }
-    });
-
-    document.getElementById("mulaiKuis").addEventListener("click", () => {
-      simpanPengaturan({
-        ...getPengaturan(),
-        filter: document.getElementById("filterBagian").value,
-        urutan: document.getElementById("urutanSoal").value,
-        otomatisLanjut: document.getElementById("otomatisLanjut").checked
+      const statsSesudah = getStatistik();
+      const delta = hitungDeltaSesi(quizState.statsSebelum, statsSesudah);
+      const sesi = getRiwayatSesi();
+      sesi.push({
+        tanggal: new Date().toISOString(),
+        durasi: quizState.timerDetik,
+        selesai: quizState.daftarSoal.filter(q => {
+          const p = getProgresSoal(q.id);
+          return p.status && p.status !== "";
+        }).length,
+        benar: delta.benar,
+        salah: delta.salah,
+        lewat: delta.lewat,
+        flag: delta.flag,
+        streak: quizState.streakSesi
       });
-      navigasi("/quiz");
-    });
+      simpanSesi(sesi);
 
-    document.getElementById("btnReviewFlag").addEventListener("click", () => {
-      simpanPengaturan({ ...getPengaturan(), filter: "flag" });
-      navigasi("/quiz");
-    });
+      document.getElementById("selesaiContainer").style.display = "block";
+    }
+  </script>
 
-    document.getElementById("btnExport").addEventListener("click", exportData);
+  <!-- ============ STATS SCRIPT ============ -->
+  <script>
+    function initStats() {
+      if (window.__statsInited) { renderStats(); return; }
+      window.__statsInited = true;
 
-    document.getElementById("btnImport").addEventListener("click", () => {
-      document.getElementById("fileImport").click();
-    });
+      let statsDonutChart, statsBarChart, statsLineChart;
 
-    document.getElementById("fileImport").addEventListener("change", (e) => {
-      if (e.target.files[0]) importData(e.target.files[0]);
-      e.target.value = "";
-    });
+      function renderStats() {
+        const stats = getStatistik();
+        document.getElementById("sSelesai").textContent = stats.dikerjakan + "/" + stats.total;
+        document.getElementById("sAkurasi2").textContent = stats.akurasi + "%";
+        document.getElementById("sStreak2").textContent = stats.streakSaatIni;
+        document.getElementById("sStreakMax").textContent = stats.streakTerpanjang;
+        document.getElementById("sWaktu2").textContent = formatWaktu(stats.totalWaktu);
 
-    document.getElementById("btnReset").addEventListener("click", () => {
-      document.getElementById("modalReset").classList.add("visible");
-    });
+        if (statsDonutChart) statsDonutChart.destroy();
+        statsDonutChart = buatDonut(document.getElementById("donutChart").getContext("2d"), stats);
 
-    document.getElementById("konfirmasiReset").addEventListener("click", () => {
-      resetSemuaData();
-      document.getElementById("modalReset").classList.remove("visible");
-      renderDashboard();
-    });
+        if (statsBarChart) statsBarChart.destroy();
+        statsBarChart = buatBarBagian(document.getElementById("statsBarChart").getContext("2d"), stats);
 
-    renderDashboard();
+        const riwayat = getRiwayatSesi();
+        const harian = {};
+        riwayat.forEach(s => {
+          const hari = s.tanggal.split("T")[0];
+          harian[hari] = (harian[hari] || 0) + s.selesai;
+        });
+        const hariLabels = Object.keys(harian).sort();
+        const hariData = hariLabels.map(h => harian[h]);
+        if (statsLineChart) statsLineChart.destroy();
+        statsLineChart = new Chart(document.getElementById("lineChart").getContext("2d"), {
+          type: "line",
+          data: {
+            labels: hariLabels.map(h => formatTglSingkat(h)),
+            datasets: [{
+              label: "Soal Selesai",
+              data: hariData,
+              borderColor: "#8b7355",
+              backgroundColor: "rgba(139,115,85,0.08)",
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3,
+              pointBackgroundColor: "#8b7355",
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: "#e5e5e0" } },
+              x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            },
+            plugins: { legend: { display: false } }
+          }
+        });
+
+        let html = "";
+        questions.forEach(q => {
+          const p = getProgresSoal(q.id);
+          const st = statusLabel(p.status);
+          const tgl = p.timestamp ? formatTgl(p.timestamp) : "-";
+          html += "<tr><td><strong>" + q.id + "</strong></td><td>" + q.partName + '</td><td style="color:' + statusWarna(p.status) + ';font-weight:500">' + st + '</td><td>' + tgl + "</td></tr>";
+        });
+        document.getElementById("detailTableBody").innerHTML = html;
+
+        if (riwayat.length === 0) return;
+        let sesiHtml = '<table><thead><tr><th>Tanggal</th><th>Durasi</th><th>Selesai</th><th>Benar</th><th>Salah</th><th>Streak</th></tr></thead><tbody>';
+        [...riwayat].reverse().forEach(s => {
+          sesiHtml += '<tr><td>' + formatTgl(s.tanggal) + '</td><td>' + formatWaktu(s.durasi) + '</td><td>' + s.selesai + '</td><td style="color:var(--hijau)">' + s.benar + '</td><td style="color:var(--merah)">' + s.salah + '</td><td>' + (s.streak || 0) + '</td></tr>';
+        });
+        sesiHtml += "</tbody></table>";
+        document.getElementById("sesiContainer").innerHTML = sesiHtml;
+      }
+
+      document.querySelectorAll(".nav-tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".nav-tab").forEach(t => {
+            t.classList.remove("aktif");
+            t.setAttribute("aria-selected", "false");
+          });
+          document.querySelectorAll(".page-content").forEach(p => {
+            p.classList.remove("aktif");
+            p.hidden = true;
+          });
+          tab.classList.add("aktif");
+          tab.setAttribute("aria-selected", "true");
+          document.getElementById("page-" + tab.dataset.tab).classList.add("aktif");
+          document.getElementById("page-" + tab.dataset.tab).hidden = false;
+        });
+      });
+
+      document.getElementById("statsKuisBaru").addEventListener("click", () => {
+        navigasi("/quiz", true);
+      });
+
+      renderStats();
+    }
+  </script>
+
+  <script src="js/router.js"></script>
+
+  <!-- Init dark mode once -->
+  <script>
+    (function() {
+      const p = { ...getPengaturanDefault(), ...getPengaturan() };
+      if (p.darkMode) document.documentElement.classList.add("dark");
+      document.addEventListener("click", e => {
+        const btn = e.target.closest("#darkToggle, #darkToggle2, #darkToggle3");
+        if (!btn) return;
+        document.documentElement.classList.toggle("dark");
+        const isDark = document.documentElement.classList.contains("dark");
+        simpanPengaturan({ ...getPengaturan(), ...getPengaturanDefault(), darkMode: isDark });
+      });
+    })();
+
+    // Boot
+    const path = window.location.pathname.replace(/\/+$/, "") || "/";
+    const known = { "/": "initDashboard", "/quiz": "initQuiz", "/stats": "initStats" };
+    if (known[path]) window[known[path]]();
   </script>
 </body>
 </html>

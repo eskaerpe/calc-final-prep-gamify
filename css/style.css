@@ -750,9 +750,17 @@ tr:hover td { background: var(--bg-muted); }
 .items-center { align-items: center; }
 .justify-between { justify-content: space-between; }
 
+/* ========== SPA PAGES ========== */
+.page { display: none; }
+.page.aktif { display: block; animation: pageIn 250ms ease-out both; }
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* ========== REDUCED MOTION ========== */
 @media (prefers-reduced-motion: reduce) {
-  .stat-card, .hero-ring, .modal-overlay.visible, .modal-overlay.visible .modal { animation: none !important; }
+  .stat-card, .hero-ring, .page.aktif, .modal-overlay.visible, .modal-overlay.visible .modal { animation: none !important; }
 }
 
 /* ========== RESPONSIVE ========== */
