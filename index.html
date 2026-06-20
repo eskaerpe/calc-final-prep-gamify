@@ -26,7 +26,7 @@
       <div class="hero-body">
         <div class="hero-text">
           <p class="hero-eyebrow">Tugas Besar 2 — Calculus 2025/2026</p>
-          <h2 class="hero-title">34 Soal<br>Kalkulus</h2>
+          <h2 class="hero-title" id="heroTitle">32 Soal<br>Kalkulus</h2>
           <p class="hero-desc">Kerjakan soal satu per satu, nilai sendiri, dan lihat perkembanganmu.</p>
           <div class="hero-actions">
             <button class="btn btn-prime btn-lg" id="btnMulai">Mulai Kuis Baru</button>
@@ -38,7 +38,7 @@
             <canvas id="heroDonut" width="200" height="200"></canvas>
             <div class="hero-ring-label">
               <span class="hero-ring-angka" id="heroSelesai">0</span>
-              <span class="hero-ring-penyebut">/34</span>
+              <span class="hero-ring-penyebut" id="heroTotal">/32</span>
             </div>
           </div>
         </div>
@@ -64,7 +64,12 @@
       </div>
     </div>
 
-    <div class="actions-bar">
+    <div class="actions-bar" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline" id="btnExport">Ekspor Data</button>
+        <button class="btn btn-outline" id="btnImport">Impor Data</button>
+        <input type="file" id="fileImport" accept=".json" style="display:none">
+      </div>
       <button class="btn btn-outline-danger" id="btnReset">Reset Data</button>
     </div>
 
@@ -129,21 +134,23 @@
       document.getElementById("sStreak").textContent = stats.streakSaatIni;
       document.getElementById("sFlag").textContent = stats.flag;
       document.getElementById("sWaktu").textContent = formatWaktu(stats.totalWaktu);
-      document.getElementById("heroSelesai").textContent = stats.dikerjakan;
+      document.getElementById("heroSelesai").textContent = stats.benar;
+      document.getElementById("heroTotal").textContent = "/" + stats.total;
+      document.getElementById("heroTitle").innerHTML = stats.total + " Soal<br>Kalkulus";
 
       if (barChart) barChart.destroy();
       barChart = buatBarBagian(document.getElementById("barChart").getContext("2d"), stats);
 
       if (heroChart) heroChart.destroy();
       const heroCtx = document.getElementById("heroDonut").getContext("2d");
-      const sisa = stats.total - stats.dikerjakan;
+      const belum = stats.total - stats.dikerjakan;
       heroChart = new Chart(heroCtx, {
         type: "doughnut",
         data: {
-          labels: ["Selesai", "Sisa"],
+          labels: ["Benar", "Salah", "Belum"],
           datasets: [{
-            data: [stats.dikerjakan || 1, sisa || 1],
-            backgroundColor: ["#8b7355", "#e0dfda"],
+            data: [stats.benar || 1, stats.salah || 1, belum || 1],
+            backgroundColor: ["#8b7355", "#c47a7a", "#e0dfda"],
             borderWidth: 0
           }]
         },
@@ -193,6 +200,17 @@
     document.getElementById("btnReviewFlag").addEventListener("click", () => {
       simpanPengaturan({ ...getPengaturan(), filter: "flag" });
       navigasi("/quiz");
+    });
+
+    document.getElementById("btnExport").addEventListener("click", exportData);
+
+    document.getElementById("btnImport").addEventListener("click", () => {
+      document.getElementById("fileImport").click();
+    });
+
+    document.getElementById("fileImport").addEventListener("change", (e) => {
+      if (e.target.files[0]) importData(e.target.files[0]);
+      e.target.value = "";
     });
 
     document.getElementById("btnReset").addEventListener("click", () => {

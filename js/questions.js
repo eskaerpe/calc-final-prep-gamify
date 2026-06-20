@@ -1,5 +1,5 @@
 const questions = [
-  // ===== PART 1: TEKNIK INTEGRAL (LO2, 30 poin) =====
+  // ===== PART 1: TEKNIK INTEGRAL (LO2, 26 poin) =====
   {
     id: "1a", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
     soal: "\\int_0^1 \\frac{x+2}{(x^2+4x+1)^2} \\, dx",
@@ -23,7 +23,7 @@ const questions = [
   {
     id: "1e", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
     soal: "\\int \\frac{\\sin\\sqrt{1-x}}{\\sqrt{1-x}} \\, dx",
-    petunjuk: "Substitusi u = √(1-x)"
+    petunjuk: "Substitusi u = √(1-x), lalu integral substitution dasar"
   },
   {
     id: "1f", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
@@ -32,46 +32,36 @@ const questions = [
   },
   {
     id: "1g", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
-    soal: "\\int \\frac{\\sin\\sqrt{1-x}}{\\sqrt{1-x}} \\, dx",
-    petunjuk: "Substitusi u = √(1-x) — identik dengan 1e"
-  },
-  {
-    id: "1h", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
-    soal: "\\int \\frac{\\ln x}{x^2} \\, dx",
-    petunjuk: "Integral parsial: u = ln x, dv = 1/x² dx — identik dengan 1f"
-  },
-  {
-    id: "1i", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
     soal: "\\int \\frac{\\sin(4x-1)}{1-\\sin^2(4x-1)} \\, dx",
     petunjuk: "Ingat 1 - sin²θ = cos²θ, lalu substitusi u = cos(4x-1)"
   },
   {
-    id: "1j", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
+    id: "1h", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
     soal: "\\int \\sqrt{x} \\ln x \\, dx",
     petunjuk: "Integral parsial: u = ln x, dv = √x dx"
   },
   {
-    id: "1k", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
+    id: "1i", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
     soal: "\\int_0^\\pi \\cos x \\sinh x \\, dx",
     petunjuk: "Integral parsial dua kali (cyclic dengan cos x dan sinh x)"
   },
   {
-    id: "1l", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
+    id: "1j", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
     soal: "\\int_0^{\\pi/2} \\cos^5\\theta \\, d\\theta",
     petunjuk: "Gunakan identitas cos²θ = 1 - sin²θ, substitusi u = sin θ"
   },
   {
-    id: "1m", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
+    id: "1k", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
     soal: "\\int \\sin^5 4x \\cos^2 4x \\, dx",
     petunjuk: "Gunakan sin²θ = 1 - cos²θ, lalu substitusi u = cos 4x"
   },
   {
-    id: "1n", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
+    id: "1l", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
     soal: "\\int \\frac{1}{\\sqrt{9+x^2}} \\, dx",
     petunjuk: "Substitusi trigonometri: x = 3 tan θ"
   },
   {
-    id: "1o", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
+    id: "1m", part: 1, partName: "Teknik Integral", lo: "LO2", poin: 2, tipe: "math",
     soal: "\\int \\frac{\\sqrt{4-x^2}}{x} \\, dx",
     petunjuk: "Substitusi trigonometri: x = 2 sin θ"
   },

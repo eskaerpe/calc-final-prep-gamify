@@ -58,11 +58,29 @@ function simpanSesi(sesi) {
   try { localStorage.setItem(STORAGE_SESI, JSON.stringify(sesi)); } catch {}
 }
 
+// Migrasi data dari ID lama (1i-1o) ke ID baru (1g-1m) setelah deduplikasi
+function migrasiIDLama() {
+  const progres = getProgres();
+  const mapping = { "1i": "1g", "1j": "1h", "1k": "1i", "1l": "1j", "1m": "1k", "1n": "1l", "1o": "1m" };
+  let berubah = false;
+  for (const [lama, baru] of Object.entries(mapping)) {
+    if (progres[lama] && !progres[baru]) {
+      progres[baru] = progres[lama];
+      delete progres[lama];
+      berubah = true;
+    }
+  }
+  if (berubah) simpanProgres(progres);
+}
+
 function resetSemuaData() {
   localStorage.removeItem(STORAGE_PROGRES);
   localStorage.removeItem(STORAGE_PENGATURAN);
   localStorage.removeItem(STORAGE_SESI);
 }
+
+// Jalankan migrasi saat script dimuat
+migrasiIDLama();
 
 function getStatistik() {
   const progres = getProgres();
@@ -103,6 +121,39 @@ function getStatistik() {
   });
 
   return { total, benar, salah, lewat, flag, belum, dikerjakan, akurasi, totalWaktu, streakSaatIni, streakTerpanjang, soalPerBagian };
+}
+
+function exportData() {
+  const data = {
+    progres: getProgres(),
+    pengaturan: getPengaturan(),
+    sesi: getRiwayatSesi(),
+    tanggal: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `latsol-gamify-backup-${new Date().toISOString().split("T")[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.progres) simpanProgres(data.progres);
+      if (data.pengaturan) simpanPengaturan(data.pengaturan);
+      if (data.sesi) simpanSesi(data.sesi);
+      alert("Data berhasil diimpor!");
+      window.location.reload();
+    } catch {
+      alert("Gagal membaca file. Pastikan file JSON backup valid.");
+    }
+  };
+  reader.readAsText(file);
 }
 
 // Hitung delta stats untuk sesi terakhir — selisih total global sebelum & sesudah sesi
