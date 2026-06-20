@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Latsol Gamify — Kalkulus</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/router.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📐 Latsol Gamify</h1>
+      <div class="header-actions">
+        <button class="btn-icon" id="darkToggle" title="Mode Gelap">🌙</button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1>Latihan Soal Kalkulus</h1>
+      <p>34 soal dari Tugas Besar 2 Calculus — mode gamifikasi dengan statistik live</p>
+      <div class="hero-actions">
+        <button class="btn btn-primer" id="btnMulai">🚀 Mulai Kuis Baru</button>
+        <button class="btn btn-outline" data-nav="/stats">📊 Lihat Statistik</button>
+        <button class="btn btn-outline" id="btnReviewFlag">🚩 Tinjau yang Di-flag</button>
+        <button class="btn btn-outline" id="btnReset" style="color:var(--merah);border-color:var(--merah)">🗑️ Reset Data</button>
+      </div>
+    </div>
+
+    <div id="ringkasanContainer">
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card"><div class="nilai" id="sSoal">0</div><div class="label">Selesai</div></div>
+        <div class="stat-card"><div class="nilai" id="sAkurasi">0%</div><div class="label">Akurasi</div></div>
+        <div class="stat-card"><div class="nilai" id="sStreak">0</div><div class="label">Streak</div></div>
+        <div class="stat-card"><div class="nilai" id="sFlag">0</div><div class="label">Di-flag</div></div>
+        <div class="stat-card"><div class="nilai" id="sWaktu">00:00:00</div><div class="label">Total Waktu</div></div>
+      </div>
+      <div class="chart-wrapper">
+        <h3>Progress Keseluruhan</h3>
+        <canvas id="donutChart" height="200"></canvas>
+      </div>
+      <div class="chart-wrapper">
+        <h3>Akurasi per Bagian</h3>
+        <canvas id="barChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Pengaturan -->
+  <div class="modal-overlay" id="modalPengaturan">
+    <div class="modal">
+      <h2>Pengaturan Kuis</h2>
+      <div class="form-group">
+        <label for="filterBagian">Bagian Soal</label>
+        <select id="filterBagian">
+          <option value="semua">Semua Bagian</option>
+          <option value="1">Teknik Integral</option>
+          <option value="2">Aplikasi Integral</option>
+          <option value="3">Deret dan Kekonvergenan</option>
+          <option value="4">Deret Taylor & Maclaurin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="urutanSoal">Urutan</label>
+        <select id="urutanSoal">
+          <option value="berurutan">Berurutan</option>
+          <option value="acak">Acak</option>
+        </select>
+      </div>
+      <div class="form-group form-checkbox">
+        <input type="checkbox" id="otomatisLanjut">
+        <label for="otomatisLanjut">Lanjut otomatis setelah aksi</label>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-outline" id="batalPengaturan">Batal</button>
+        <button class="btn btn-primer" id="mulaiKuis">Mulai Kuis</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Konfirmasi Reset -->
+  <div class="modal-overlay" id="modalReset">
+    <div class="modal">
+      <h2>Reset Semua Data?</h2>
+      <p style="color:var(--text-sekunder);margin-bottom:16px">Semua progres, pengaturan, dan riwayat sesi akan dihapus. Tindakan ini tidak bisa dibatalkan.</p>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline" id="batalReset">Batal</button>
+        <button class="btn btn-merah" id="konfirmasiReset">Ya, Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let donutChart, barChart;
+
+    function renderDashboard() {
+      const stats = getStatistik();
+      document.getElementById("sSoal").textContent = stats.dikerjakan + "/" + stats.total;
+      document.getElementById("sAkurasi").textContent = stats.akurasi + "%";
+      document.getElementById("sStreak").textContent = stats.streakSaatIni;
+      document.getElementById("sFlag").textContent = stats.flag;
+      document.getElementById("sWaktu").textContent = formatWaktu(stats.totalWaktu);
+      renderCharts(stats);
+    }
+
+    function renderCharts(stats) {
+      const donutCtx = document.getElementById("donutChart").getContext("2d");
+      if (donutChart) donutChart.destroy();
+      donutChart = new Chart(donutCtx, {
+        type: "doughnut",
+        data: {
+          labels: ["Benar", "Salah", "Dilewati", "Di-flag", "Belum"],
+          datasets: [{
+            data: [stats.benar, stats.salah, stats.lewat, stats.flag, stats.belum],
+            backgroundColor: ["#22c55e", "#ef4444", "#6b7280", "#f59e0b", "#d1d5db"]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom", labels: { padding: 16, usePointStyle: true } }
+          }
+        }
+      });
+
+      const barCtx = document.getElementById("barChart").getContext("2d");
+      if (barChart) barChart.destroy();
+      const labels = Object.values(stats.soalPerBagian).map(s => s.partName);
+      const benarData = Object.values(stats.soalPerBagian).map(s => s.benar);
+      const salahData = Object.values(stats.soalPerBagian).map(s => s.salah);
+      barChart = new Chart(barCtx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            { label: "Benar", data: benarData, backgroundColor: "#22c55e" },
+            { label: "Salah", data: salahData, backgroundColor: "#ef4444" }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+          plugins: { legend: { position: "bottom", labels: { usePointStyle: true } } }
+        }
+      });
+    }
+
+    // Dark mode
+    const pengaturan = { ...getPengaturanDefault(), ...getPengaturan() };
+    if (pengaturan.darkMode) document.documentElement.classList.add("dark");
+
+    document.getElementById("darkToggle").addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+      pengaturan.darkMode = document.documentElement.classList.contains("dark");
+      simpanPengaturan(pengaturan);
+    });
+
+    // Start quiz
+    document.getElementById("btnMulai").addEventListener("click", () => {
+      const p = getPengaturan();
+      document.getElementById("filterBagian").value = p.filter || "semua";
+      document.getElementById("urutanSoal").value = p.urutan || "berurutan";
+      document.getElementById("otomatisLanjut").checked = p.otomatisLanjut || false;
+      document.getElementById("modalPengaturan").classList.add("visible");
+    });
+
+    document.getElementById("batalPengaturan").addEventListener("click", () => {
+      document.getElementById("modalPengaturan").classList.remove("visible");
+    });
+
+    document.getElementById("mulaiKuis").addEventListener("click", () => {
+      simpanPengaturan({
+        ...getPengaturan(),
+        filter: document.getElementById("filterBagian").value,
+        urutan: document.getElementById("urutanSoal").value,
+        otomatisLanjut: document.getElementById("otomatisLanjut").checked
+      });
+      navigasi("/quiz");
+    });
+
+    // Review flagged
+    document.getElementById("btnReviewFlag").addEventListener("click", () => {
+      simpanPengaturan({ ...getPengaturan(), filter: "flag" });
+      navigasi("/quiz");
+    });
+
+    // Reset
+    document.getElementById("btnReset").addEventListener("click", () => {
+      document.getElementById("modalReset").classList.add("visible");
+    });
+    document.getElementById("batalReset").addEventListener("click", () => {
+      document.getElementById("modalReset").classList.remove("visible");
+    });
+    document.getElementById("konfirmasiReset").addEventListener("click", () => {
+      resetSemuaData();
+      document.getElementById("modalReset").classList.remove("visible");
+      renderDashboard();
+    });
+
+    renderDashboard();
+  </script>
+</body>
+</html>
