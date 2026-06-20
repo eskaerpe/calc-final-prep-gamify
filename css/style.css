@@ -139,14 +139,20 @@ body {
   display: inline-block;
   padding: 0 4px;
   font-size: 10px;
-  background: var(--bg-muted);
-  border: 1px solid var(--border-light);
+  background: rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.12);
   border-radius: 3px;
   font-family: inherit;
   line-height: 1.6;
-  opacity: 0.6;
-  margin-left: 2px;
+  color: #1a1a1a;
+  margin-left: 3px;
   letter-spacing: 0;
+}
+
+.dark .kbd {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.15);
+  color: #e0dfda;
 }
 
 /* ========== CARD ========== */
@@ -226,6 +232,12 @@ body {
   min-height: 180px;
 }
 
+.question-card.text-left {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 32px;
+}
+
 .question-number {
   font-size: 13px;
   color: var(--text-dim);
@@ -240,6 +252,15 @@ body {
   width: 100%;
   overflow-x: auto;
   line-height: 1.8;
+}
+
+.question-text {
+  font-size: 16px;
+  text-align: left;
+  width: 100%;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* ========== ACTION BAR ========== */

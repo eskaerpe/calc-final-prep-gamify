@@ -116,12 +116,14 @@
       daftarSoal = questions.filter(q => q.part === parseInt(pengaturan.filter));
     }
 
+    let skipping = false;
     if (daftarSoal.length === 0) {
       document.getElementById("questionCard").innerHTML = '<div style="text-align:center;padding:40px"><h2>Tidak ada soal</h2><p style="color:var(--text-dim)">Tidak ada soal yang cocok dengan filter ini.</p><button class="btn btn-prime mt-4" data-nav="/">Kembali</button></div>';
       document.getElementById("selesaiContainer").style.display = "none";
       document.querySelector(".action-bar").innerHTML = "";
       document.querySelector(".nav-bar").innerHTML = "";
       document.getElementById("questionId").textContent = "";
+      skipping = true;
     }
 
     if (pengaturan.urutan === "acak" && pengaturan.filter !== "flag") {
@@ -170,7 +172,17 @@
 
       document.getElementById("soalCounter").textContent = `Soal ${index + 1} / ${daftarSoal.length}`;
       document.getElementById("questionId").textContent = `${q.id}  ${q.partName}  ${q.poin} poin`;
-      document.getElementById("questionMath").innerHTML = `$$${q.soal}$$`;
+      const mathEl = document.getElementById("questionMath");
+      const card = document.getElementById("questionCard");
+      if (q.tipe === "text") {
+        mathEl.className = "question-text";
+        mathEl.innerHTML = q.soal.replace(/\n/g, "<br>");
+        card.classList.add("text-left");
+      } else {
+        mathEl.className = "question-math";
+        mathEl.innerHTML = `$$${q.soal}$$`;
+        card.classList.remove("text-left");
+      }
       document.getElementById("hintText").textContent = q.petunjuk;
       document.getElementById("hintBox").classList.remove("visible");
       document.getElementById("answerText").value = p.jawaban || "";
@@ -365,9 +377,10 @@
         '<div style="text-align:center;padding:40px"><p style="color:var(--text-dim);margin-bottom:12px">Belum ada soal yang di-flag.</p><button class="btn btn-prime" data-nav="/">Kembali</button></div>';
       document.querySelector(".action-bar").innerHTML = "";
       document.querySelector(".nav-bar").innerHTML = "";
+      skipping = true;
     }
 
-    renderSoal();
+    if (!skipping) renderSoal();
   </script>
 </body>
 </html>
