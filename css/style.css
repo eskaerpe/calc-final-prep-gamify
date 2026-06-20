@@ -82,27 +82,29 @@ body {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: transform 160ms var(--ease), box-shadow 160ms var(--ease);
+  transition: transform 160ms var(--ease), box-shadow 160ms var(--ease), background 200ms var(--ease), color 200ms var(--ease), border-color 200ms var(--ease);
   text-decoration: none;
   line-height: 1.4;
   letter-spacing: 0.01em;
 }
 .btn:active { transform: scale(0.97); }
-
-.btn-prime {
-  background: var(--accent);
-  color: #fff;
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
-.btn-prime:hover { background: var(--accent-hover); }
+
+.btn-prime { background: var(--accent); color: #fff; }
+.btn-prime:hover { background: var(--accent-hover); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
 
 .btn-hijau { background: var(--hijau); color: #fff; }
-.btn-hijau:hover { opacity: 0.92; }
+.btn-hijau:hover { opacity: 0.9; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .btn-merah { background: var(--merah); color: #fff; }
-.btn-merah:hover { opacity: 0.92; }
+.btn-merah:hover { opacity: 0.9; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .btn-abu { background: var(--abu); color: #fff; }
-.btn-abu:hover { opacity: 0.92; }
+.btn-abu:hover { opacity: 0.9; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .btn-kuning { background: var(--kuning); color: #1a1a1a; }
-.btn-kuning:hover { opacity: 0.92; }
+.btn-kuning:hover { opacity: 0.9; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.btn-kuning.aktif { box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.1); }
 
 .btn-outline {
   background: transparent;
@@ -110,7 +112,15 @@ body {
   color: var(--text);
   padding: 8px 17px;
 }
-.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+.btn-outline-danger {
+  background: transparent;
+  border: 1px solid var(--merah);
+  color: var(--merah);
+  padding: 8px 17px;
+}
+.btn-outline-danger:hover { background: var(--merah-bg); border-color: var(--merah); color: var(--merah); }
 
 .btn-ghost {
   background: transparent;
@@ -129,11 +139,15 @@ body {
   color: var(--text-dim);
   cursor: pointer;
   font-size: 16px;
-  transition: transform 160ms var(--ease), border-color 200ms var(--ease), color 200ms var(--ease);
+  transition: transform 160ms var(--ease), border-color 200ms var(--ease), color 200ms var(--ease), background 200ms var(--ease);
 }
-.btn-icon:active { transform: scale(0.95); }
-.btn-icon:hover { border-color: var(--accent); color: var(--accent); }
-.btn-icon.aktif { background: var(--kuning-bg); color: var(--kuning); border-color: var(--kuning); }
+.btn-icon:active { transform: scale(0.97); }
+.btn-icon:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.btn-icon:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 
 .kbd {
   display: inline-block;
@@ -552,7 +566,8 @@ tr:hover td { background: var(--bg-muted); }
   transition: transform 160ms var(--ease), color 200ms var(--ease);
   box-shadow: var(--shadow);
 }
-.panel-toggle:active { transform: translateY(-50%) scale(0.95); }
+.panel-toggle:active { transform: translateY(-50%) scale(0.97); }
+.panel-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .panel-toggle:hover { color: var(--accent); }
 .panel-toggle.terbuka { right: 280px; }
 

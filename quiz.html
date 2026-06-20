@@ -28,9 +28,9 @@
         <span id="timerDisplay">00:00:00</span>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn-icon" title="Statistik Live" id="panelToggle">📊</button>
+        <button class="btn-icon" title="Statistik Live" id="panelToggle" aria-label="Statistik live">📊</button>
         <button class="btn-ghost" data-nav="/">Beranda</button>
-        <button class="btn-icon" id="darkToggle">🌙</button>
+        <button class="btn-icon" id="darkToggle" aria-label="Alihkan mode gelap">🌙</button>
       </div>
     </div>
 
@@ -118,7 +118,7 @@
 
     let skipping = false;
     if (daftarSoal.length === 0) {
-      document.getElementById("questionCard").innerHTML = '<div style="text-align:center;padding:40px"><h2>Tidak ada soal</h2><p style="color:var(--text-dim)">Tidak ada soal yang cocok dengan filter ini.</p><button class="btn btn-prime mt-4" data-nav="/">Kembali</button></div>';
+      document.getElementById("questionCard").innerHTML = '<div style="text-align:center;padding:40px"><h2>Tidak ada soal</h2><p style="color:var(--text-dim)">Tidak ada soal yang cocok dengan filter ini.</p><button class="btn btn-outline mt-4" data-nav="/">Kembali</button></div>';
       document.getElementById("selesaiContainer").style.display = "none";
       document.querySelector(".action-bar").innerHTML = "";
       document.querySelector(".nav-bar").innerHTML = "";
@@ -374,7 +374,7 @@
 
     if (flagFallback) {
       document.getElementById("questionCard").innerHTML =
-        '<div style="text-align:center;padding:40px"><p style="color:var(--text-dim);margin-bottom:12px">Belum ada soal yang di-flag.</p><button class="btn btn-prime" data-nav="/">Kembali</button></div>';
+        '<div style="text-align:center;padding:40px"><p style="color:var(--text-dim);margin-bottom:12px">Belum ada soal yang di-flag.</p><button class="btn btn-outline mt-4" data-nav="/">Kembali</button></div>';
       document.querySelector(".action-bar").innerHTML = "";
       document.querySelector(".nav-bar").innerHTML = "";
       skipping = true;
