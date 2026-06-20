@@ -288,6 +288,16 @@
 
   <!-- ============ DASHBOARD SCRIPT ============ -->
   <script>
+    function bukaModalPengaturan() {
+      const p = getPengaturan();
+      document.getElementById("filterBagian").value = p.filter || "semua";
+      if (p.filter === "flag") document.getElementById("filterBagian").value = "semua";
+      document.getElementById("urutanSoal").value = p.urutan || "berurutan";
+      document.getElementById("otomatisLanjut").checked = p.otomatisLanjut || false;
+      document.getElementById("modalPengaturan").classList.add("visible");
+      setTimeout(trapFocus, 50, document.getElementById("modalPengaturan"));
+    }
+
     function initDashboard() {
       if (window.__dashInited) { renderDashboard(); return; }
       window.__dashInited = true;
@@ -329,14 +339,7 @@
         });
       }
 
-      document.getElementById("btnMulai").addEventListener("click", () => {
-        const p = getPengaturan();
-        document.getElementById("filterBagian").value = p.filter || "semua";
-        document.getElementById("urutanSoal").value = p.urutan || "berurutan";
-        document.getElementById("otomatisLanjut").checked = p.otomatisLanjut || false;
-        document.getElementById("modalPengaturan").classList.add("visible");
-        setTimeout(trapFocus, 50, document.getElementById("modalPengaturan"));
-      });
+      document.getElementById("btnMulai").addEventListener("click", bukaModalPengaturan);
 
       document.getElementById("batalPengaturan").addEventListener("click", () => {
         document.getElementById("modalPengaturan").classList.remove("visible");
@@ -359,6 +362,7 @@
           urutan: document.getElementById("urutanSoal").value,
           otomatisLanjut: document.getElementById("otomatisLanjut").checked
         });
+        document.getElementById("modalPengaturan").classList.remove("visible");
         navigasi("/quiz", true);
       });
 
@@ -846,9 +850,7 @@
         });
       });
 
-      document.getElementById("statsKuisBaru").addEventListener("click", () => {
-        navigasi("/quiz", true);
-      });
+      document.getElementById("statsKuisBaru").addEventListener("click", bukaModalPengaturan);
 
       renderStats();
     }
