@@ -134,9 +134,18 @@
     let timerDetik = 0;
     let timerInterval = null;
     let isSelesai = false;
+    let sesiDimulai = false;
     let streakSesi = 0;
     let sesiBenar = 0, sesiSalah = 0, sesiLewati = 0, sesiFlag = 0;
     let liveChart = null;
+
+    // Konfirmasi navigasi keluar jika sesi sedang berjalan
+    window.addEventListener("beforeunload", e => {
+      if (sesiDimulai && !isSelesai) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    });
 
     // Snapshot global sebelum sesi dimulai
     const statsSebelum = getStatistik();
@@ -153,6 +162,7 @@
 
     function mulaiTimer() {
       if (timerInterval) return;
+      sesiDimulai = true;
       timerInterval = setInterval(() => {
         timerDetik++;
         document.getElementById("timerDisplay").textContent = formatWaktu(timerDetik);
