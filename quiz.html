@@ -5,38 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kuis — Latsol Gamify</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>📐</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="js/questions.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/router.js"></script>
   <script>
-    MathJax = { tex: { inlineMath: [["$","$"],["\\(","\\)"]] }, svg: { fontCache: "global" } };
+    MathJax = {
+      tex: { inlineMath: [["$","$"],["\\(","\\)"]] },
+      chtml: { fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2" }
+    };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
 </head>
 <body>
   <div class="container">
     <div class="top-bar">
       <div class="top-bar-info">
         <span id="soalCounter">Soal 1 / 34</span>
-        <span class="badge badge-biru" id="badgeBagian">Teknik Integral</span>
+        <span class="badge badge-1" id="badgeBagian">Teknik Integral</span>
         <span id="timerDisplay">00:00:00</span>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn btn-outline" data-nav="/">🏠</button>
-        <button class="btn btn-outline" data-nav="/stats">📊</button>
+        <button class="btn-icon" title="Statistik Live" id="panelToggle">📊</button>
+        <button class="btn-ghost" data-nav="/">Beranda</button>
         <button class="btn-icon" id="darkToggle">🌙</button>
       </div>
     </div>
 
     <div class="question-card" id="questionCard">
       <div class="question-number" id="questionId">1a</div>
-      <div class="question-math" id="questionMath">$$\\int_0^1 \\frac{x+2}{(x^2+4x+1)^2} \\, dx$$</div>
+      <div class="question-math" id="questionMath">$$\int_0^1 \frac{x+2}{(x^2+4x+1)^2} \, dx$$</div>
     </div>
 
     <div class="hint-box" id="hintBox">
-      <div class="hint-label">💡 Petunjuk</div>
+      <div class="hint-label">Petunjuk</div>
       <div class="hint-text" id="hintText"></div>
     </div>
 
@@ -45,56 +49,82 @@
     </div>
 
     <div class="action-bar">
-      <button class="btn btn-hijau" id="btnBenar">✅ Benar <span class="kbd">B</span></button>
-      <button class="btn btn-merah" id="btnSalah">❌ Salah <span class="kbd">S</span></button>
-      <button class="btn btn-abu" id="btnLewati">⏭️ Lewati <span class="kbd">L</span></button>
-      <button class="btn btn-kuning" id="btnFlag">🚩 Flag <span class="kbd">F</span></button>
-      <button class="btn btn-outline" id="btnPetunjuk">💡 Petunjuk <span class="kbd">P</span></button>
+      <button class="btn btn-hijau" id="btnBenar">Benar <span class="kbd">B</span></button>
+      <button class="btn btn-merah" id="btnSalah">Salah <span class="kbd">S</span></button>
+      <button class="btn btn-abu" id="btnLewati">Lewati <span class="kbd">L</span></button>
+      <button class="btn btn-kuning" id="btnFlag">Flag <span class="kbd">F</span></button>
+      <button class="btn btn-outline" id="btnPetunjuk">Petunjuk <span class="kbd">P</span></button>
     </div>
 
     <div class="nav-bar">
       <button class="btn btn-outline" id="btnPrev">◀ Sebelumnya</button>
       <div class="progress-dots" id="progressDots"></div>
-      <button class="btn btn-primer" id="btnNext">Berikutnya ▶</button>
+      <button class="btn btn-prime" id="btnNext">Berikutnya ▶</button>
     </div>
 
     <div id="selesaiContainer" style="display:none">
       <div class="congrats card">
-        <h2>🎉 Selamat!</h2>
+        <h2>Selamat!</h2>
         <p>Kamu telah menyelesaikan semua soal dalam sesi ini.</p>
         <div style="display:flex;gap:8px;justify-content:center">
-          <button class="btn btn-primer" data-nav="/stats">📊 Lihat Statistik</button>
-          <button class="btn btn-outline" data-nav="/">🏠 Kembali ke Dashboard</button>
+          <button class="btn btn-prime" data-nav="/stats">Lihat Statistik</button>
+          <button class="btn btn-outline" data-nav="/">Kembali</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    const pengaturan = { ...getPengaturanDefault(), ...getPengaturan() };
-    if (pengaturan.darkMode) document.documentElement.classList.add("dark");
-    document.getElementById("darkToggle").addEventListener("click", () => {
-      document.documentElement.classList.toggle("dark");
-      pengaturan.darkMode = document.documentElement.classList.contains("dark");
-      simpanPengaturan(pengaturan);
-    });
+  <!-- Live Stats Panel -->
+  <button class="panel-toggle" id="panelToggleBtn" title="Live Statistik">◀</button>
+  <div class="live-panel" id="livePanel">
+    <div class="live-panel-inner">
+      <h3>Sesi Ini</h3>
+      <div class="live-stat"><span class="lbl">Soal Dikerjakan</span><span class="val" id="liveSelesai">0</span></div>
+      <div class="live-stat"><span class="lbl">Benar</span><span class="val" style="color:var(--hijau)" id="liveBenar">0</span></div>
+      <div class="live-stat"><span class="lbl">Salah</span><span class="val" style="color:var(--merah)" id="liveSalah">0</span></div>
+      <div class="live-stat"><span class="lbl">Dilewati</span><span class="val" style="color:var(--abu)" id="liveLewati">0</span></div>
+      <div class="live-stat"><span class="lbl">Di-flag</span><span class="val" style="color:var(--kuning)" id="liveFlag">0</span></div>
+      <div class="live-stat"><span class="lbl">Streak</span><span class="val" id="liveStreak">0</span></div>
+      <div class="live-stat"><span class="lbl">Akurasi</span><span class="val" id="liveAkurasi">0%</span></div>
+      <div class="live-chart-box">
+        <canvas id="liveDonut" height="160"></canvas>
+      </div>
 
-    // Filter & order questions
+      <h3 style="margin-top:20px">Global</h3>
+      <div class="live-stat"><span class="lbl">Total Dikerjakan</span><span class="val" id="liveGlobalSelesai">0</span></div>
+      <div class="live-stat"><span class="lbl">Akurasi Global</span><span class="val" id="liveGlobalAkurasi">0%</span></div>
+    </div>
+  </div>
+
+  <script>
+    initDarkMode();
+
+    const pengaturan = { ...getPengaturanDefault(), ...getPengaturan() };
+
+    // Filter & order
     let daftarSoal = [...questions];
+    let flagFallback = false;
     if (pengaturan.filter === "flag") {
       const progres = getProgres();
-      daftarSoal = questions.filter(q => progres[q.id]?.status === "flag");
-      if (daftarSoal.length === 0) daftarSoal = [...questions];
+      const flagged = questions.filter(q => progres[q.id]?.status === "flag");
+      if (flagged.length > 0) {
+        daftarSoal = flagged;
+      } else {
+        flagFallback = true;
+      }
     } else if (pengaturan.filter !== "semua") {
       daftarSoal = questions.filter(q => q.part === parseInt(pengaturan.filter));
     }
+
     if (daftarSoal.length === 0) {
-      document.getElementById("questionCard").innerHTML = '<div style="text-align:center;padding:40px"><h2>Tidak ada soal</h2><p style="color:var(--text-sekunder)">Tidak ada soal yang cocok dengan filter ini.</p><button class="btn btn-primer" data-nav="/" style="margin-top:16px">Kembali ke Dashboard</button></div>';
+      document.getElementById("questionCard").innerHTML = '<div style="text-align:center;padding:40px"><h2>Tidak ada soal</h2><p style="color:var(--text-dim)">Tidak ada soal yang cocok dengan filter ini.</p><button class="btn btn-prime mt-4" data-nav="/">Kembali</button></div>';
       document.getElementById("selesaiContainer").style.display = "none";
       document.querySelector(".action-bar").innerHTML = "";
       document.querySelector(".nav-bar").innerHTML = "";
+      document.getElementById("questionId").textContent = "";
     }
-    if (pengaturan.urutan === "acak") {
+
+    if (pengaturan.urutan === "acak" && pengaturan.filter !== "flag") {
       daftarSoal = acakArray(daftarSoal);
     }
 
@@ -103,15 +133,19 @@
     let timerInterval = null;
     let isSelesai = false;
     let streakSesi = 0;
+    let sesiBenar = 0, sesiSalah = 0, sesiLewati = 0, sesiFlag = 0;
+    let liveChart = null;
+
+    // Snapshot global sebelum sesi dimulai
+    const statsSebelum = getStatistik();
 
     function simpanJawabanSaatIni() {
       const q = daftarSoal[index];
       if (!q) return;
-      const progres = getProgresSoal(q.id);
       updateProgresSoal(q.id, {
         jawaban: document.getElementById("answerText").value,
-        waktu: timerDetik,
-        status: progres.status || ""
+        waktu: 0,
+        status: getProgresSoal(q.id).status || ""
       });
     }
 
@@ -132,28 +166,21 @@
       if (index < 0) index = 0;
 
       const q = daftarSoal[index];
-      const progres = getProgresSoal(q.id);
+      const p = getProgresSoal(q.id);
 
       document.getElementById("soalCounter").textContent = `Soal ${index + 1} / ${daftarSoal.length}`;
-      document.getElementById("questionId").textContent = `${q.id} • ${q.partName} • ${q.poin} poin`;
+      document.getElementById("questionId").textContent = `${q.id}  ${q.partName}  ${q.poin} poin`;
       document.getElementById("questionMath").innerHTML = `$$${q.soal}$$`;
       document.getElementById("hintText").textContent = q.petunjuk;
       document.getElementById("hintBox").classList.remove("visible");
-      document.getElementById("answerText").value = progres.jawaban || "";
+      document.getElementById("answerText").value = p.jawaban || "";
 
-      // Badge
       const badge = document.getElementById("badgeBagian");
-      const warna = ["badge-biru", "badge-hijau", "badge-kuning", "badge-ungu"][q.part - 1] || "badge-biru";
-      badge.className = `badge ${warna}`;
+      badge.className = `badge badge-${q.part}`;
       badge.textContent = q.partName;
 
-      // Flag button state
       const btnFlag = document.getElementById("btnFlag");
-      if (progres.status === "flag") {
-        btnFlag.classList.add("aktif");
-      } else {
-        btnFlag.classList.remove("aktif");
-      }
+      btnFlag.classList.toggle("aktif", p.status === "flag");
 
       renderProgressDots();
       renderMath();
@@ -188,13 +215,19 @@
     function aksi(status) {
       mulaiTimer();
       const q = daftarSoal[index];
-      if (status === "benar") streakSesi++;
-      else if (status === "salah") streakSesi = 0;
+
+      if (status === "benar") { streakSesi++; sesiBenar++; }
+      else if (status === "salah") { streakSesi = 0; sesiSalah++; }
+      else if (status === "lewat") { sesiLewati++; }
+      else if (status === "flag") { sesiFlag++; }
+
       updateProgresSoal(q.id, {
         status,
         jawaban: document.getElementById("answerText").value,
-        waktu: timerDetik
+        waktu: 0
       });
+
+      updateLiveStats();
 
       if (pengaturan.otomatisLanjut) {
         index++;
@@ -204,14 +237,67 @@
       }
     }
 
+    function updateLiveStats() {
+      const selesai = sesiBenar + sesiSalah + sesiLewati;
+      const akurasi = selesai > 0 ? Math.round((sesiBenar / selesai) * 100) : 0;
+      document.getElementById("liveSelesai").textContent = selesai;
+      document.getElementById("liveBenar").textContent = sesiBenar;
+      document.getElementById("liveSalah").textContent = sesiSalah;
+      document.getElementById("liveLewati").textContent = sesiLewati;
+      document.getElementById("liveFlag").textContent = sesiFlag;
+      document.getElementById("liveStreak").textContent = streakSesi;
+      document.getElementById("liveAkurasi").textContent = akurasi + "%";
+
+      const g = getStatistik();
+      document.getElementById("liveGlobalSelesai").textContent = g.dikerjakan;
+      document.getElementById("liveGlobalAkurasi").textContent = g.akurasi + "%";
+
+      if (liveChart) liveChart.destroy();
+      const ctx = document.getElementById("liveDonut").getContext("2d");
+      liveChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Benar", "Salah", "Lewati", "Flag"],
+          datasets: [{
+            data: [sesiBenar || 1, sesiSalah || 1, sesiLewati || 1, sesiFlag || 1],
+            backgroundColor: ["#7ca67c", "#c47a7a", "#8a8a8a", "#c4a67a"],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true, cutout: "72%",
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // Panel toggle
+    const panelToggleBtn = document.getElementById("panelToggleBtn");
+    const panel = document.getElementById("livePanel");
+    let panelOpen = false;
+
+    function togglePanel() {
+      panelOpen = !panelOpen;
+      panel.classList.toggle("terbuka", panelOpen);
+      panelToggleBtn.classList.toggle("terbuka", panelOpen);
+      panelToggleBtn.textContent = panelOpen ? "▶" : "◀";
+    }
+
+    document.getElementById("panelToggle").addEventListener("click", togglePanel);
+    panelToggleBtn.addEventListener("click", togglePanel);
+    updateLiveStats();
+
+    // Event listeners
     document.getElementById("btnBenar").addEventListener("click", () => aksi("benar"));
     document.getElementById("btnSalah").addEventListener("click", () => aksi("salah"));
     document.getElementById("btnLewati").addEventListener("click", () => aksi("lewat"));
     document.getElementById("btnFlag").addEventListener("click", () => {
       const q = daftarSoal[index];
-      const progres = getProgresSoal(q.id);
-      const newStatus = progres.status === "flag" ? "" : "flag";
-      updateProgresSoal(q.id, { status: newStatus, jawaban: document.getElementById("answerText").value, waktu: timerDetik });
+      const p = getProgresSoal(q.id);
+      const newStatus = p.status === "flag" ? "" : "flag";
+      if (newStatus === "flag") sesiFlag++; else sesiFlag = Math.max(0, sesiFlag - 1);
+      updateProgresSoal(q.id, { status: newStatus, jawaban: document.getElementById("answerText").value, waktu: 0 });
+      updateLiveStats();
       renderSoal();
     });
     document.getElementById("btnPetunjuk").addEventListener("click", () => {
@@ -228,9 +314,10 @@
       renderSoal();
     });
 
-    // Keyboard shortcuts
+    // Keyboard
     document.addEventListener("keydown", e => {
       if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+      if (e.key === "Escape") { if (panelOpen) togglePanel(); return; }
       switch (e.key.toLowerCase()) {
         case "b": document.getElementById("btnBenar").click(); break;
         case "s": document.getElementById("btnSalah").click(); break;
@@ -252,23 +339,32 @@
       document.querySelector(".nav-bar").style.display = "none";
       document.getElementById("timerDisplay").textContent = formatWaktu(timerDetik);
 
-      // Simpan sesi
-      const progres = getProgres();
-      const stats = getStatistik();
+      const statsSesudah = getStatistik();
+      const delta = hitungDeltaSesi(statsSebelum, statsSesudah);
       const sesi = getRiwayatSesi();
       sesi.push({
         tanggal: new Date().toISOString(),
         durasi: timerDetik,
-        selesai: daftarSoal.length,
-        benar: stats.benar,
-        salah: stats.salah,
-        lewat: stats.lewat,
-        flag: stats.flag,
+        selesai: daftarSoal.filter(q => {
+          const p = getProgresSoal(q.id);
+          return p.status && p.status !== "";
+        }).length,
+        benar: delta.benar,
+        salah: delta.salah,
+        lewat: delta.lewat,
+        flag: delta.flag,
         streak: streakSesi
       });
       simpanSesi(sesi);
 
       document.getElementById("selesaiContainer").style.display = "block";
+    }
+
+    if (flagFallback) {
+      document.getElementById("questionCard").innerHTML =
+        '<div style="text-align:center;padding:40px"><p style="color:var(--text-dim);margin-bottom:12px">Belum ada soal yang di-flag.</p><button class="btn btn-prime" data-nav="/">Kembali</button></div>';
+      document.querySelector(".action-bar").innerHTML = "";
+      document.querySelector(".nav-bar").innerHTML = "";
     }
 
     renderSoal();

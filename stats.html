@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Statistik — Latsol Gamify</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>📐</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="js/questions.js"></script>
   <script src="js/utils.js"></script>
@@ -14,10 +15,10 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>📊 Statistik</h1>
+      <h1>Statistik</h1>
       <div class="header-actions">
-        <button class="btn btn-outline" data-nav="/">🏠 Dashboard</button>
-        <button class="btn btn-primer" data-nav="/quiz">🚀 Lanjut Kuis</button>
+        <button class="btn btn-outline" data-nav="/">Beranda</button>
+        <button class="btn btn-prime" data-nav="/quiz">Kuis Baru</button>
         <button class="btn-icon" id="darkToggle">🌙</button>
       </div>
     </div>
@@ -37,15 +38,15 @@
     </div>
 
     <div class="page-content aktif" id="page-grafik">
-      <div class="chart-wrapper">
+      <div class="chart-box">
         <h3>Status Keseluruhan</h3>
         <canvas id="donutChart" height="200"></canvas>
       </div>
-      <div class="chart-wrapper">
+      <div class="chart-box">
         <h3>Benar / Salah per Bagian</h3>
         <canvas id="barChart" height="220"></canvas>
       </div>
-      <div class="chart-wrapper">
+      <div class="chart-box">
         <h3>Soal per Hari</h3>
         <canvas id="lineChart" height="200"></canvas>
       </div>
@@ -53,14 +54,13 @@
 
     <div class="page-content" id="page-detail">
       <div class="card" style="overflow:hidden;padding:0">
-        <div class="tabel-container">
+        <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Soal</th>
                 <th>Bagian</th>
                 <th>Status</th>
-                <th>Waktu</th>
                 <th>Tanggal</th>
               </tr>
             </thead>
@@ -72,32 +72,14 @@
 
     <div class="page-content" id="page-sesi">
       <div class="card" style="overflow:hidden;padding:0">
-        <div class="tabel-container" id="sesiContainer">
-          <p style="padding:20px;color:var(--text-sekunder)">Belum ada riwayat sesi.</p>
+        <div class="table-wrap" id="sesiContainer">
+          <p style="padding:20px;color:var(--text-dim)">Belum ada riwayat sesi.</p>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    const pengaturan = { ...getPengaturanDefault(), ...getPengaturan() };
-    if (pengaturan.darkMode) document.documentElement.classList.add("dark");
-    document.getElementById("darkToggle").addEventListener("click", () => {
-      document.documentElement.classList.toggle("dark");
-      pengaturan.darkMode = document.documentElement.classList.contains("dark");
-      simpanPengaturan(pengaturan);
-    });
-
-    // Tab switching
-    document.querySelectorAll(".nav-tab").forEach(tab => {
-      tab.addEventListener("click", () => {
-        document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("aktif"));
-        document.querySelectorAll(".page-content").forEach(p => p.classList.remove("aktif"));
-        tab.classList.add("aktif");
-        document.getElementById("page-" + tab.dataset.tab).classList.add("aktif");
-      });
-    });
-
     let donutChart, barChart, lineChart;
 
     function renderStats() {
@@ -108,49 +90,13 @@
       document.getElementById("sStreakMax").textContent = stats.streakTerpanjang;
       document.getElementById("sWaktu").textContent = formatWaktu(stats.totalWaktu);
 
-      // Donut
-      const donutCtx = document.getElementById("donutChart").getContext("2d");
       if (donutChart) donutChart.destroy();
-      donutChart = new Chart(donutCtx, {
-        type: "doughnut",
-        data: {
-          labels: ["Benar", "Salah", "Dilewati", "Di-flag", "Belum"],
-          datasets: [{
-            data: [stats.benar, stats.salah, stats.lewat, stats.flag, stats.belum],
-            backgroundColor: ["#22c55e", "#ef4444", "#6b7280", "#f59e0b", "#d1d5db"]
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: "bottom", labels: { padding: 16, usePointStyle: true } }
-          }
-        }
-      });
+      donutChart = buatDonut(document.getElementById("donutChart").getContext("2d"), stats);
 
-      // Bar per part
-      const barCtx = document.getElementById("barChart").getContext("2d");
       if (barChart) barChart.destroy();
-      const labels = Object.values(stats.soalPerBagian).map(s => s.partName.replace("Deret dan Kekonvergenan", "Deret").replace("Deret Taylor & Maclaurin", "Taylor"));
-      const benarData = Object.values(stats.soalPerBagian).map(s => s.benar);
-      const salahData = Object.values(stats.soalPerBagian).map(s => s.salah);
-      barChart = new Chart(barCtx, {
-        type: "bar",
-        data: {
-          labels,
-          datasets: [
-            { label: "Benar", data: benarData, backgroundColor: "#22c55e" },
-            { label: "Salah", data: salahData, backgroundColor: "#ef4444" }
-          ]
-        },
-        options: {
-          responsive: true,
-          scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
-          plugins: { legend: { position: "bottom", labels: { usePointStyle: true } } }
-        }
-      });
+      barChart = buatBarBagian(document.getElementById("barChart").getContext("2d"), stats);
 
-      // Line chart: daily questions
+      // Line chart: harian
       const riwayat = getRiwayatSesi();
       const harian = {};
       riwayat.forEach(s => {
@@ -159,24 +105,29 @@
       });
       const hariLabels = Object.keys(harian).sort();
       const hariData = hariLabels.map(h => harian[h]);
-      const lineCtx = document.getElementById("lineChart").getContext("2d");
       if (lineChart) lineChart.destroy();
-      lineChart = new Chart(lineCtx, {
+      lineChart = new Chart(document.getElementById("lineChart").getContext("2d"), {
         type: "line",
         data: {
           labels: hariLabels.map(h => formatTglSingkat(h)),
           datasets: [{
             label: "Soal Selesai",
             data: hariData,
-            borderColor: "#3b82f6",
-            backgroundColor: "rgba(59,130,246,0.1)",
+            borderColor: "#8b7355",
+            backgroundColor: "rgba(139,115,85,0.08)",
             fill: true,
-            tension: 0.3
+            tension: 0.3,
+            pointRadius: 3,
+            pointBackgroundColor: "#8b7355",
+            borderWidth: 2
           }]
         },
         options: {
           responsive: true,
-          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, grid: { color: "#e5e5e0" } },
+            x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+          },
           plugins: { legend: { display: false } }
         }
       });
@@ -186,13 +137,11 @@
       questions.forEach(q => {
         const p = getProgresSoal(q.id);
         const st = statusLabel(p.status);
-        const w = p.waktu ? formatWaktu(p.waktu) : "-";
         const tgl = p.timestamp ? formatTgl(p.timestamp) : "-";
         html += `<tr>
           <td><strong>${q.id}</strong></td>
           <td>${q.partName}</td>
-          <td style="color:${statusWarna(p.status)};font-weight:600">${st}</td>
-          <td>${w}</td>
+          <td style="color:${statusWarna(p.status)};font-weight:500">${st}</td>
           <td>${tgl}</td>
         </tr>`;
       });
@@ -221,6 +170,17 @@
       sesiHtml += "</tbody></table>";
       document.getElementById("sesiContainer").innerHTML = sesiHtml;
     }
+
+    initDarkMode();
+
+    document.querySelectorAll(".nav-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("aktif"));
+        document.querySelectorAll(".page-content").forEach(p => p.classList.remove("aktif"));
+        tab.classList.add("aktif");
+        document.getElementById("page-" + tab.dataset.tab).classList.add("aktif");
+      });
+    });
 
     renderStats();
   </script>

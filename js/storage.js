@@ -11,7 +11,7 @@ function getProgres() {
 }
 
 function simpanProgres(progres) {
-  localStorage.setItem(STORAGE_PROGRES, JSON.stringify(progres));
+  try { localStorage.setItem(STORAGE_PROGRES, JSON.stringify(progres)); } catch {}
 }
 
 function getProgresSoal(id) {
@@ -34,7 +34,7 @@ function getPengaturan() {
 }
 
 function simpanPengaturan(settings) {
-  localStorage.setItem(STORAGE_PENGATURAN, JSON.stringify(settings));
+  try { localStorage.setItem(STORAGE_PENGATURAN, JSON.stringify(settings)); } catch {}
 }
 
 function getPengaturanDefault() {
@@ -55,7 +55,7 @@ function getRiwayatSesi() {
 }
 
 function simpanSesi(sesi) {
-  localStorage.setItem(STORAGE_SESI, JSON.stringify(sesi));
+  try { localStorage.setItem(STORAGE_SESI, JSON.stringify(sesi)); } catch {}
 }
 
 function resetSemuaData() {
@@ -103,4 +103,14 @@ function getStatistik() {
   });
 
   return { total, benar, salah, lewat, flag, belum, dikerjakan, akurasi, totalWaktu, streakSaatIni, streakTerpanjang, soalPerBagian };
+}
+
+// Hitung delta stats untuk sesi terakhir — selisih total global sebelum & sesudah sesi
+function hitungDeltaSesi(sebelum, sesudah) {
+  return {
+    benar: sesudah.benar - sebelum.benar,
+    salah: sesudah.salah - sebelum.salah,
+    lewat: sesudah.lewat - sebelum.lewat,
+    flag: sesudah.flag - sebelum.flag,
+  };
 }
