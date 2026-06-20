@@ -45,11 +45,11 @@
     </div>
 
     <div class="action-bar">
-      <button class="btn btn-hijau" id="btnBenar">✅ Benar</button>
-      <button class="btn btn-merah" id="btnSalah">❌ Salah</button>
-      <button class="btn btn-abu" id="btnLewati">⏭️ Lewati</button>
-      <button class="btn btn-kuning" id="btnFlag">🚩 Flag</button>
-      <button class="btn btn-outline" id="btnPetunjuk">💡 Petunjuk</button>
+      <button class="btn btn-hijau" id="btnBenar">✅ Benar <span class="kbd">B</span></button>
+      <button class="btn btn-merah" id="btnSalah">❌ Salah <span class="kbd">S</span></button>
+      <button class="btn btn-abu" id="btnLewati">⏭️ Lewati <span class="kbd">L</span></button>
+      <button class="btn btn-kuning" id="btnFlag">🚩 Flag <span class="kbd">F</span></button>
+      <button class="btn btn-outline" id="btnPetunjuk">💡 Petunjuk <span class="kbd">P</span></button>
     </div>
 
     <div class="nav-bar">
@@ -88,6 +88,12 @@
     } else if (pengaturan.filter !== "semua") {
       daftarSoal = questions.filter(q => q.part === parseInt(pengaturan.filter));
     }
+    if (daftarSoal.length === 0) {
+      document.getElementById("questionCard").innerHTML = '<div style="text-align:center;padding:40px"><h2>Tidak ada soal</h2><p style="color:var(--text-sekunder)">Tidak ada soal yang cocok dengan filter ini.</p><button class="btn btn-primer" data-nav="/" style="margin-top:16px">Kembali ke Dashboard</button></div>';
+      document.getElementById("selesaiContainer").style.display = "none";
+      document.querySelector(".action-bar").innerHTML = "";
+      document.querySelector(".nav-bar").innerHTML = "";
+    }
     if (pengaturan.urutan === "acak") {
       daftarSoal = acakArray(daftarSoal);
     }
@@ -96,6 +102,18 @@
     let timerDetik = 0;
     let timerInterval = null;
     let isSelesai = false;
+    let streakSesi = 0;
+
+    function simpanJawabanSaatIni() {
+      const q = daftarSoal[index];
+      if (!q) return;
+      const progres = getProgresSoal(q.id);
+      updateProgresSoal(q.id, {
+        jawaban: document.getElementById("answerText").value,
+        waktu: timerDetik,
+        status: progres.status || ""
+      });
+    }
 
     function mulaiTimer() {
       if (timerInterval) return;
@@ -154,6 +172,7 @@
 
       container.querySelectorAll(".progress-dot").forEach(dot => {
         dot.addEventListener("click", () => {
+          simpanJawabanSaatIni();
           index = parseInt(dot.dataset.idx);
           renderSoal();
         });
@@ -169,6 +188,8 @@
     function aksi(status) {
       mulaiTimer();
       const q = daftarSoal[index];
+      if (status === "benar") streakSesi++;
+      else if (status === "salah") streakSesi = 0;
       updateProgresSoal(q.id, {
         status,
         jawaban: document.getElementById("answerText").value,
@@ -198,9 +219,11 @@
     });
 
     document.getElementById("btnPrev").addEventListener("click", () => {
+      simpanJawabanSaatIni();
       if (index > 0) { index--; renderSoal(); }
     });
     document.getElementById("btnNext").addEventListener("click", () => {
+      simpanJawabanSaatIni();
       index++;
       renderSoal();
     });
@@ -241,7 +264,7 @@
         salah: stats.salah,
         lewat: stats.lewat,
         flag: stats.flag,
-        streak: stats.streakSaatIni
+        streak: streakSesi
       });
       simpanSesi(sesi);
 

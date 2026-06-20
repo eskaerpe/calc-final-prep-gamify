@@ -88,8 +88,9 @@ function getStatistik() {
   const riwayat = getRiwayatSesi();
   let streakSaatIni = 0, streakTerpanjang = 0;
   if (riwayat.length > 0) {
-    streakTerpanjang = Math.max(...riwayat.map(s => s.streak || 0));
-    streakSaatIni = riwayat[riwayat.length - 1].streak || 0;
+    const streaks = riwayat.map(s => s.streak || 0);
+    streakTerpanjang = Math.max(...streaks);
+    streakSaatIni = streaks[streaks.length - 1];
   }
 
   const soalPerBagian = {};
