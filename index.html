@@ -335,6 +335,7 @@
         document.getElementById("urutanSoal").value = p.urutan || "berurutan";
         document.getElementById("otomatisLanjut").checked = p.otomatisLanjut || false;
         document.getElementById("modalPengaturan").classList.add("visible");
+        setTimeout(trapFocus, 50, document.getElementById("modalPengaturan"));
       });
 
       document.getElementById("batalPengaturan").addEventListener("click", () => {
@@ -379,6 +380,7 @@
 
       document.getElementById("btnReset").addEventListener("click", () => {
         document.getElementById("modalReset").classList.add("visible");
+        setTimeout(trapFocus, 50, document.getElementById("modalReset"));
       });
 
       document.getElementById("konfirmasiReset").addEventListener("click", () => {
@@ -388,6 +390,19 @@
       });
 
       renderDashboard();
+    }
+
+    function trapFocus(modal) {
+      const focusable = modal.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      modal.addEventListener("keydown", e => {
+        if (e.key !== "Tab") return;
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      });
+      first.focus();
     }
   </script>
 
@@ -549,10 +564,11 @@
     function mulaiTimer() {
       if (!quizState || quizState.timerInterval) return;
       quizState.sesiDimulai = true;
+      const timerMulai = Date.now();
       quizState.timerInterval = setInterval(() => {
-        quizState.timerDetik++;
+        quizState.timerDetik = Math.round((Date.now() - timerMulai) / 1000);
         document.getElementById("timerDisplay").textContent = formatWaktu(quizState.timerDetik);
-      }, 1000);
+      }, 200);
     }
 
     function renderSoal() {
@@ -606,7 +622,7 @@
         if (i === quizState.index) cls += " aktif";
         const st = progres[q.id]?.status || "";
         if (st) cls += " " + st;
-        return '<div class="' + cls + '" data-idx="' + i + '"></div>';
+        return '<div class="' + cls + '" data-idx="' + i + '" role="button" aria-label="Soal nomor ' + (i + 1) + '"' + (i === quizState.index ? ' aria-current="true"' : '') + '></div>';
       }).join("");
 
       container.querySelectorAll(".progress-dot").forEach(dot => {
@@ -666,23 +682,33 @@
       document.getElementById("liveGlobalSelesai").textContent = g.dikerjakan;
       document.getElementById("liveGlobalAkurasi").textContent = g.akurasi + "%";
 
-      if (quizState.liveChart) quizState.liveChart.destroy();
-      const ctx = document.getElementById("liveDonut").getContext("2d");
-      quizState.liveChart = new Chart(ctx, {
-        type: "doughnut",
-        data: {
-          labels: ["Benar", "Salah", "Lewati", "Flag"],
-          datasets: [{
-            data: [quizState.sesiBenar || 1, quizState.sesiSalah || 1, quizState.sesiLewati || 1, quizState.sesiFlag || 1],
-            backgroundColor: ["#7ca67c", "#c47a7a", "#8a8a8a", "#c4a67a"],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          responsive: true, cutout: "72%",
-          plugins: { legend: { display: false } }
-        }
-      });
+      if (!quizState.liveChart) {
+        const ctx = document.getElementById("liveDonut").getContext("2d");
+        quizState.liveChart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["Benar", "Salah", "Lewati", "Flag"],
+            datasets: [{
+              data: [quizState.sesiBenar || 1, quizState.sesiSalah || 1, quizState.sesiLewati || 1, quizState.sesiFlag || 1],
+              backgroundColor: ["#7ca67c", "#c47a7a", "#8a8a8a", "#c4a67a"],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true, cutout: "72%",
+            plugins: { legend: { display: false } },
+            animation: { duration: 0 }
+          }
+        });
+      } else {
+        quizState.liveChart.data.datasets[0].data = [
+          quizState.sesiBenar || 1,
+          quizState.sesiSalah || 1,
+          quizState.sesiLewati || 1,
+          quizState.sesiFlag || 1
+        ];
+        quizState.liveChart.update('none');
+      }
     }
 
     function toggleQuizPanel() {
@@ -691,6 +717,8 @@
       quizState.panel.classList.toggle("terbuka", quizState.panelOpen);
       quizState.panelToggleBtn.classList.toggle("terbuka", quizState.panelOpen);
       quizState.panelToggleBtn.textContent = quizState.panelOpen ? "\u25B6" : "\u25C0";
+      quizState.panelToggleBtn.setAttribute("aria-expanded", quizState.panelOpen.toString());
+      quizState.panel.setAttribute("aria-hidden", (!quizState.panelOpen).toString());
     }
 
     function tampilkanSelesai() {

@@ -11,7 +11,17 @@ function getProgres() {
 }
 
 function simpanProgres(progres) {
-  try { localStorage.setItem(STORAGE_PROGRES, JSON.stringify(progres)); } catch {}
+  try {
+    const data = JSON.stringify(progres);
+    if (data.length > 4500000) {
+      for (const id in progres) {
+        if (progres[id]?.jawaban?.length > 5000) {
+          progres[id].jawaban = progres[id].jawaban.slice(0, 5000) + "...[terpotong]";
+        }
+      }
+    }
+    localStorage.setItem(STORAGE_PROGRES, JSON.stringify(progres));
+  } catch {}
 }
 
 function getProgresSoal(id) {
@@ -55,7 +65,11 @@ function getRiwayatSesi() {
 }
 
 function simpanSesi(sesi) {
-  try { localStorage.setItem(STORAGE_SESI, JSON.stringify(sesi)); } catch {}
+  try {
+    const data = JSON.stringify(sesi);
+    if (data.length > 4500000) return;
+    localStorage.setItem(STORAGE_SESI, data);
+  } catch {}
 }
 
 // Migrasi data dari ID lama (1i-1o) ke ID baru (1g-1m) setelah deduplikasi
