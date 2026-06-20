@@ -1,13 +1,9 @@
 const ROUTES = {
   "#/": { page: "page-dashboard", init: "initDashboard" },
   "#/quiz": { page: "page-quiz", init: "initQuiz" },
-  "#/stats": { page: "page-stats", init: "initStats" }
+  "#/stats": { page: "page-stats", init: "initStats" },
+  "#/flag-quiz": { page: "page-flag-quiz", init: "initFlagQuiz" }
 };
-
-function getRouteFromHash() {
-  const hash = location.hash || "#/";
-  return ROUTES[hash] || ROUTES["#/"];
-}
 
 function navigasi(path, fresh) {
   const hash = "#" + path;

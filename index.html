@@ -225,6 +225,60 @@
         </div>
       </div>
     </div>
+
+    <!-- ============ PAGE: FLAG QUIZ ============ -->
+    <div id="page-flag-quiz" class="page">
+      <div class="top-bar">
+        <div class="top-bar-info">
+          <span id="fq-soalCounter">Soal 1 / 0</span>
+          <span class="badge badge-1" id="fq-badgeBagian">Di-flag</span>
+          <span id="fq-timerDisplay">00:00:00</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn-ghost" data-nav="/">Beranda</button>
+          <button class="btn-icon" id="darkToggle4" aria-label="Alihkan mode gelap">&#127769;</button>
+        </div>
+      </div>
+
+      <div class="question-card" id="fq-questionCard">
+        <div class="question-number" id="fq-questionId">1a</div>
+        <div class="question-math" id="fq-questionMath">$$ \int_0^1 \frac{x+2}{(x^2+4x+1)^2} \, dx $$</div>
+      </div>
+
+      <div class="hint-box" id="fq-hintBox">
+        <div class="hint-label">Petunjuk</div>
+        <div class="hint-text" id="fq-hintText"></div>
+      </div>
+
+      <div class="answer-box" id="fq-answerBox">
+        <textarea id="fq-answerText" placeholder="Tulis jawabanmu di sini (opsional)..." rows="2"></textarea>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-hijau" id="fq-btnBenar">Benar <span class="kbd">B</span></button>
+        <button class="btn btn-merah" id="fq-btnSalah">Salah <span class="kbd">S</span></button>
+        <button class="btn btn-abu" id="fq-btnLewati">Lewati <span class="kbd">L</span></button>
+        <button class="btn btn-kuning" id="fq-btnHapusFlag">Hapus Flag <span class="kbd">F</span></button>
+        <button class="btn btn-outline" id="fq-btnPetunjuk">Petunjuk <span class="kbd">P</span></button>
+      </div>
+
+      <div class="nav-bar">
+        <button class="btn btn-outline" id="fq-btnPrev">&#9664; Sebelumnya</button>
+        <div class="progress-dots" id="fq-progressDots"></div>
+        <button class="btn btn-prime" id="fq-btnNext">Berikutnya &#9654;</button>
+      </div>
+
+      <div id="fq-selesaiContainer" style="display:none">
+        <div class="congrats card">
+          <h2>Selesai!</h2>
+          <p>Kamu telah meninjau semua soal yang di-flag.</p>
+          <div id="fq-selesaiRincian" style="margin-bottom:16px;font-size:14px;color:var(--text-dim)"></div>
+          <div style="display:flex;gap:8px;justify-content:center">
+            <button class="btn btn-prime" data-nav="/">Kembali</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Modal Pengaturan -->
@@ -290,8 +344,7 @@
   <script>
     function bukaModalPengaturan() {
       const p = getPengaturan();
-      document.getElementById("filterBagian").value = p.filter || "semua";
-      if (p.filter === "flag") document.getElementById("filterBagian").value = "semua";
+      document.getElementById("filterBagian").value = filterSaja(p.filter || "semua");
       document.getElementById("urutanSoal").value = p.urutan || "berurutan";
       document.getElementById("otomatisLanjut").checked = p.otomatisLanjut || false;
       document.getElementById("modalPengaturan").classList.add("visible");
@@ -367,8 +420,7 @@
       });
 
       document.getElementById("btnReviewFlag").addEventListener("click", () => {
-        simpanPengaturan({ ...getPengaturan(), filter: "flag" });
-        navigasi("/quiz", true);
+        navigasi("/flag-quiz", true);
       });
 
       document.getElementById("btnExport").addEventListener("click", exportData);
@@ -486,23 +538,13 @@
         const pengaturan = { ...getPengaturanDefault(), ...getPengaturan() };
         let daftarSoal = [...questions];
         let skipping = false;
-        let flagFallback = false;
 
-        if (pengaturan.filter === "flag") {
-          const progres = getProgres();
-          const flagged = questions.filter(q => progres[q.id]?.status === "flag");
-          if (flagged.length > 0) {
-            daftarSoal = flagged;
-          } else {
-            flagFallback = true;
-          }
-        } else if (pengaturan.filter !== "semua") {
+        if (filterSaja(pengaturan.filter) !== "semua") {
           daftarSoal = questions.filter(q => q.part === parseInt(pengaturan.filter));
         }
 
         if (daftarSoal.length === 0) {
           document.getElementById("questionCard").innerHTML = '<div style="text-align:center;padding:40px"><h2>Tidak ada soal</h2><p style="color:var(--text-dim)">Tidak ada soal yang cocok dengan filter ini.</p><button class="btn btn-outline mt-4" onclick="navigasi(\'/\')">Kembali</button></div>';
-          document.getElementById("selesaiContainer").style.display = "none";
           document.querySelector("#page-quiz .action-bar").innerHTML = "";
           document.querySelector("#page-quiz .nav-bar").innerHTML = "";
           document.getElementById("questionId").textContent = "";
@@ -510,17 +552,8 @@
           skipping = true;
         }
 
-        if (pengaturan.urutan === "acak" && pengaturan.filter !== "flag") {
+        if (pengaturan.urutan === "acak") {
           daftarSoal = acakArray(daftarSoal);
-        }
-
-        if (flagFallback) {
-          const qc = document.getElementById("questionCard");
-          qc.innerHTML = '<div style="text-align:center;padding:40px"><p style="color:var(--text-dim);margin-bottom:12px">Belum ada soal yang di-flag.</p><button class="btn btn-outline mt-4" onclick="navigasi(\'/\')">Kembali</button></div>';
-          document.querySelector("#page-quiz .action-bar").innerHTML = "";
-          document.querySelector("#page-quiz .nav-bar").innerHTML = "";
-          document.getElementById("answerBox").style.display = "none";
-          skipping = true;
         }
 
         quizState = {
@@ -626,7 +659,7 @@
         if (i === quizState.index) cls += " aktif";
         const st = progres[q.id]?.status || "";
         if (st) cls += " " + st;
-        return '<div class="' + cls + '" data-idx="' + i + '" role="button" aria-label="Soal nomor ' + (i + 1) + '"' + (i === quizState.index ? ' aria-current="true"' : '') + '></div>';
+        return '<div class="' + cls + '" data-idx="' + i + '" role="button"></div>';
       }).join("");
 
       container.querySelectorAll(".progress-dot").forEach(dot => {
@@ -662,12 +695,8 @@
 
       updateLiveStats();
 
-      if (quizState.pengaturan.otomatisLanjut) {
-        quizState.index++;
-        renderSoal();
-      } else {
-        renderProgressDots();
-      }
+      quizState.index++;
+      renderSoal();
     }
 
     function updateLiveStats() {
@@ -856,6 +885,181 @@
     }
   </script>
 
+  <!-- ============ FLAG QUIZ SCRIPT ============ -->
+  <script>
+    let flagQuizState = null;
+
+    function initFlagQuiz(fresh) {
+      const first = !window.__fqInited;
+
+      if (first) {
+        window.__fqInited = true;
+
+        document.getElementById("fq-btnBenar").addEventListener("click", () => fqAksi("benar"));
+        document.getElementById("fq-btnSalah").addEventListener("click", () => fqAksi("salah"));
+        document.getElementById("fq-btnLewati").addEventListener("click", () => fqAksi("lewat"));
+        document.getElementById("fq-btnHapusFlag").addEventListener("click", () => fqAksi("hapus"));
+        document.getElementById("fq-btnPetunjuk").addEventListener("click", () => {
+          document.getElementById("fq-hintBox").classList.toggle("visible");
+        });
+
+        document.getElementById("fq-btnPrev").addEventListener("click", () => {
+          if (flagQuizState.index > 0) { flagQuizState.index--; renderFlagSoal(); }
+        });
+        document.getElementById("fq-btnNext").addEventListener("click", () => {
+          flagQuizState.index++;
+          renderFlagSoal();
+        });
+
+        document.addEventListener("keydown", e => {
+          if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+          const map = { "b": "fq-btnBenar", "s": "fq-btnSalah", "l": "fq-btnLewati", "f": "fq-btnHapusFlag", "p": "fq-btnPetunjuk", "arrowright": "fq-btnNext", "arrowleft": "fq-btnPrev" };
+          const id = map[e.key.toLowerCase()];
+          if (id) document.getElementById(id).click();
+        });
+      }
+
+      if (first || fresh) {
+        // Restore DOM to default state
+        document.getElementById("fq-questionCard").style.display = "";
+        document.getElementById("fq-questionCard").style.padding = "";
+        document.getElementById("fq-hintBox").style.display = "";
+        document.getElementById("fq-answerBox").style.display = "";
+        document.getElementById("fq-answerText").value = "";
+        document.querySelector("#page-flag-quiz .action-bar").style.display = "";
+        document.querySelector("#page-flag-quiz .nav-bar").style.display = "";
+        document.getElementById("fq-selesaiContainer").style.display = "none";
+
+        const progres = getProgres();
+        let daftarSoal = questions.filter(q => progres[q.id]?.status === "flag");
+        let skipping = false;
+
+        if (daftarSoal.length === 0) {
+          document.getElementById("fq-questionCard").innerHTML = '<div style="text-align:center;padding:40px"><p style="color:var(--text-dim);margin-bottom:12px">Belum ada soal yang di-flag.</p><button class="btn btn-outline mt-4" onclick="navigasi(\'/\')">Kembali</button></div>';
+          document.getElementById("fq-hintBox").style.display = "none";
+          document.getElementById("fq-answerBox").style.display = "none";
+          document.querySelector("#page-flag-quiz .action-bar").style.display = "none";
+          document.querySelector("#page-flag-quiz .nav-bar").style.display = "none";
+          skipping = true;
+        }
+
+        flagQuizState = {
+          daftarSoal,
+          index: 0,
+          timerDetik: 0,
+          timerInterval: null,
+          selesai: false,
+          fqBenar: 0,
+          fqSalah: 0,
+          fqLewati: 0,
+          fqHapus: 0,
+          skipping
+        };
+      }
+
+      if (flagQuizState && !flagQuizState.skipping) {
+        renderFlagSoal();
+      }
+    }
+
+    function renderFlagSoal() {
+      if (!flagQuizState || flagQuizState.selesai) return;
+      if (flagQuizState.skipping) return;
+      if (flagQuizState.index >= flagQuizState.daftarSoal.length) {
+        fqTampilkanSelesai();
+        return;
+      }
+      if (flagQuizState.index < 0) flagQuizState.index = 0;
+
+      const q = flagQuizState.daftarSoal[flagQuizState.index];
+      const s = flagQuizState.daftarSoal;
+
+      document.getElementById("fq-soalCounter").textContent = `Soal ${flagQuizState.index + 1} / ${s.length}`;
+      document.getElementById("fq-questionId").textContent = q.id + "  " + q.partName + "  " + q.poin + " poin";
+
+      const mathEl = document.getElementById("fq-questionMath");
+      const card = document.getElementById("fq-questionCard");
+      if (q.tipe === "text") {
+        mathEl.className = "question-text";
+        mathEl.innerHTML = q.soal.replace(/\n/g, "<br>");
+        card.classList.add("text-left");
+      } else {
+        mathEl.className = "question-math";
+        mathEl.innerHTML = "$$" + q.soal + "$$";
+        card.classList.remove("text-left");
+      }
+
+      document.getElementById("fq-hintText").textContent = q.petunjuk;
+      document.getElementById("fq-hintBox").classList.remove("visible");
+      document.getElementById("fq-answerText").value = "";
+
+      const badge = document.getElementById("fq-badgeBagian");
+      badge.className = "badge badge-" + q.part;
+      badge.textContent = q.partName;
+
+      fqRenderDots();
+      renderMath();
+    }
+
+    function fqRenderDots() {
+      if (!flagQuizState) return;
+      const container = document.getElementById("fq-progressDots");
+      const progres = getProgres();
+      container.innerHTML = flagQuizState.daftarSoal.map((q, i) => {
+        let cls = "progress-dot";
+        if (i === flagQuizState.index) cls += " aktif";
+        const st = progres[q.id]?.status || "";
+        if (st && st !== "flag") cls += " " + st;
+        return '<div class="' + cls + '" data-idx="' + i + '" role="button"></div>';
+      }).join("");
+
+      container.querySelectorAll(".progress-dot").forEach(dot => {
+        dot.addEventListener("click", () => {
+          flagQuizState.index = parseInt(dot.dataset.idx);
+          renderFlagSoal();
+        });
+      });
+    }
+
+    function fqAksi(status) {
+      if (!flagQuizState) return;
+      const q = flagQuizState.daftarSoal[flagQuizState.index];
+
+      let newStatus = status;
+      if (status === "hapus") newStatus = "";
+
+      updateProgresSoal(q.id, {
+        status: newStatus,
+        jawaban: document.getElementById("fq-answerText").value,
+        waktu: 0
+      });
+
+      if (status === "benar") flagQuizState.fqBenar++;
+      else if (status === "salah") flagQuizState.fqSalah++;
+      else if (status === "lewat") flagQuizState.fqLewati++;
+      else if (status === "hapus") flagQuizState.fqHapus++;
+
+      flagQuizState.index++;
+      renderFlagSoal();
+    }
+
+    function fqTampilkanSelesai() {
+      if (!flagQuizState) return;
+      flagQuizState.selesai = true;
+      document.getElementById("fq-questionCard").style.display = "none";
+      document.getElementById("fq-hintBox").style.display = "none";
+      document.getElementById("fq-answerBox").style.display = "none";
+      document.querySelector("#page-flag-quiz .action-bar").style.display = "none";
+      document.querySelector("#page-flag-quiz .nav-bar").style.display = "none";
+      document.getElementById("fq-timerDisplay").textContent = formatWaktu(flagQuizState.timerDetik);
+
+      const s = flagQuizState;
+      document.getElementById("fq-selesaiRincian").textContent =
+        "Benar: " + s.fqBenar + "  |  Salah: " + s.fqSalah + "  |  Dilewati: " + s.fqLewati + "  |  Flag dihapus: " + s.fqHapus;
+      document.getElementById("fq-selesaiContainer").style.display = "block";
+    }
+  </script>
+
   <script src="js/router.js"></script>
 
   <!-- Init dark mode once -->
@@ -864,7 +1068,7 @@
       const p = { ...getPengaturanDefault(), ...getPengaturan() };
       if (p.darkMode) document.documentElement.classList.add("dark");
       document.addEventListener("click", e => {
-        const btn = e.target.closest("#darkToggle, #darkToggle2, #darkToggle3");
+        const btn = e.target.closest("#darkToggle, #darkToggle2, #darkToggle3, #darkToggle4");
         if (!btn) return;
         document.documentElement.classList.toggle("dark");
         const isDark = document.documentElement.classList.contains("dark");
@@ -873,9 +1077,9 @@
     })();
 
     // Boot — read hash to determine which page to initialize
+    const known = { "#/": "initDashboard", "#/quiz": "initQuiz", "#/stats": "initStats", "#/flag-quiz": "initFlagQuiz" };
     const hash = location.hash || "#/";
-    const known = { "#/": "initDashboard", "#/quiz": "initQuiz", "#/stats": "initStats" };
-    if (known[hash]) window[known[hash]]();
+    if (known[hash]) window[known[hash]](false);
   </script>
 </body>
 </html>

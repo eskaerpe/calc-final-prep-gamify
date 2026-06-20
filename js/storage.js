@@ -72,6 +72,22 @@ function simpanSesi(sesi) {
   } catch {}
 }
 
+const FILTER_VALID = ["semua", "1", "2", "3", "4"];
+
+function filterSaja(val) {
+  return FILTER_VALID.includes(val) ? val : "semua";
+}
+
+// Bersihkan stale filter dari localStorage (mis. "flag" dari kode lama)
+function migrasiPengaturan() {
+  const p = getPengaturan();
+  if (p.filter && !FILTER_VALID.includes(p.filter)) {
+    p.filter = "semua";
+    simpanPengaturan(p);
+  }
+}
+migrasiPengaturan();
+
 // Migrasi data dari ID lama (1i-1o) ke ID baru (1g-1m) setelah deduplikasi
 function migrasiIDLama() {
   const progres = getProgres();
